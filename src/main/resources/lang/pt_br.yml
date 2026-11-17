@@ -1,0 +1,79 @@
+auto-protected: "<gray>🔒 Protegido. Só você e seus amigos de baú podem abri-lo. <dark_gray>(/vlock)"
+protected: "<green>🔒 Este contêiner agora está protegido."
+unprotected: "<yellow>🔓 Proteção removida."
+already-yours: "<gray>Este contêiner já está protegido por você."
+locked: "<red>🔒 Trancado por <yellow>{owner}</yellow>."
+locked-password: "<red>🔒 Trancado por <yellow>{owner}</yellow>. <gray>Sabe a senha? /vlock unlock SENHA"
+not-yours: "<red>Este contêiner pertence a <yellow>{owner}</yellow>."
+no-target: "<red>Olhe para um baú ou outro contêiner (máx. 6 blocos)."
+info-free: "<gray>Este contêiner não está protegido. <dark_gray>/vlock on"
+info: "<gold>🔒 Dono: <yellow>{owner}</yellow> <gray>· Senha: {password} · Amigos de baú: {buddies}"
+"yes": "sim"
+"no": "não"
+password-set: "<green>Senha definida. Outros abrem com /vlock unlock SENHA até saírem do jogo."
+password-cleared: "<yellow>Senha removida."
+password-length: "<red>Use de 3 a 64 caracteres na senha."
+no-password: "<red>Este contêiner não tem senha."
+wrong-password: "<red>Senha errada."
+unlocked: "<green>🔓 Destrancado para você até sair do jogo."
+unknown-player: "<red>Jogador desconhecido: {player}"
+buddy-self: "<red>Você sempre pode abrir seus próprios contêineres."
+buddy-limit: "<red>Você pode ter no máximo {max} amigos de baú."
+buddy-added: "<green>{player} agora pode abrir todos os seus contêineres protegidos."
+buddy-added-you: "<green>{player} adicionou você como amigo de baú: você pode abrir os contêineres protegidos dele."
+buddy-already: "<gray>{player} já é seu amigo de baú."
+buddy-removed: "<yellow>{player} não é mais seu amigo de baú."
+buddy-missing: "<red>{player} não é seu amigo de baú."
+buddy-none: "<gray>Nenhum amigo de baú ainda. /chestbuddy add NOME"
+buddy-list: "<gold>Amigos de baú: <white>{players}"
+save-failed: "<red>Falha ao salvar; veja o log do servidor."
+feature-off: "<red>Este recurso está desligado neste servidor."
+commands:
+  vlock:
+    description: "Proteger contêineres, definir senha, abrir com senha"
+    aliases: []
+    sub:
+      info:
+        name: info
+        aliases: []
+        description: "Quem é o dono do contêiner que você olha"
+      "on":
+        name: "on"
+        aliases: []
+        description: "Proteger o contêiner que você olha"
+      "off":
+        name: "off"
+        aliases: []
+        description: "Remover sua proteção"
+      password:
+        name: password
+        aliases: []
+        description: "Definir uma senha (clear = remover)"
+        args:
+          password: SENHA
+      unlock:
+        name: unlock
+        aliases: []
+        description: "Abrir um contêiner com a senha"
+        args:
+          password: SENHA
+  chestbuddy:
+    description: "Amigos que podem abrir todos os seus contêineres protegidos"
+    aliases: []
+    sub:
+      add:
+        name: add
+        aliases: []
+        description: "Adicionar um amigo de baú"
+        args:
+          player: JOGADOR
+      remove:
+        name: remove
+        aliases: []
+        description: "Remover um amigo de baú"
+        args:
+          player: JOGADOR
+      list:
+        name: list
+        aliases: []
+        description: "Seus amigos de baú"

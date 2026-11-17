@@ -1,0 +1,8 @@
+title: '锁'
+pages:
+  - title: '自动保护'
+    text: |
+      你放置的箱子、木桶、潜影盒、熔炉和漏斗会立即受到保护。只有你能打开或破坏它们。/vlock 显示容器的主人；/vlock off 移除保护。
+  - title: '好友和密码'
+    text: |
+      /chestbuddy add 名字 让好友打开你所有受保护的容器。/vlock password 词 给一个容器设置密码：其他人用 /vlock unlock 词 打开，直到退出游戏。

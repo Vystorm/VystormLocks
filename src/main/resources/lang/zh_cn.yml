@@ -1,0 +1,79 @@
+auto-protected: "<gray>🔒 已保护。只有你和你的箱子好友可以打开。<dark_gray>(/vlock)"
+protected: "<green>🔒 这个容器现在已受保护。"
+unprotected: "<yellow>🔓 已移除保护。"
+already-yours: "<gray>这个容器已经由你保护。"
+locked: "<red>🔒 已被 <yellow>{owner}</yellow> 锁定。"
+locked-password: "<red>🔒 已被 <yellow>{owner}</yellow> 锁定。<gray>知道密码？/vlock unlock 密码"
+not-yours: "<red>这个容器属于 <yellow>{owner}</yellow>。"
+no-target: "<red>请看向一个箱子或其他容器（最多 6 格）。"
+info-free: "<gray>这个容器未受保护。<dark_gray>/vlock on"
+info: "<gold>🔒 主人：<yellow>{owner}</yellow> <gray>· 密码：{password} · 箱子好友：{buddies}"
+"yes": "是"
+"no": "否"
+password-set: "<green>已设置密码。其他人可用 /vlock unlock 密码 打开，直到退出游戏。"
+password-cleared: "<yellow>已移除密码。"
+password-length: "<red>密码长度需为 3–64 个字符。"
+no-password: "<red>这个容器没有密码。"
+wrong-password: "<red>密码错误。"
+unlocked: "<green>🔓 已为你解锁，直到你退出游戏。"
+unknown-player: "<red>未知玩家：{player}"
+buddy-self: "<red>你随时可以打开自己的容器。"
+buddy-limit: "<red>你最多可以有 {max} 个箱子好友。"
+buddy-added: "<green>{player} 现在可以打开你所有受保护的容器。"
+buddy-added-you: "<green>{player} 把你加为箱子好友：你可以打开他受保护的容器。"
+buddy-already: "<gray>{player} 已经是你的箱子好友。"
+buddy-removed: "<yellow>{player} 不再是你的箱子好友。"
+buddy-missing: "<red>{player} 不是你的箱子好友。"
+buddy-none: "<gray>还没有箱子好友。/chestbuddy add 名字"
+buddy-list: "<gold>箱子好友：<white>{players}"
+save-failed: "<red>保存失败；请查看服务器日志。"
+feature-off: "<red>此功能在本服务器已关闭。"
+commands:
+  vlock:
+    description: "保护容器、设置密码、用密码打开"
+    aliases: []
+    sub:
+      info:
+        name: info
+        aliases: []
+        description: "你看着的容器归谁所有"
+      "on":
+        name: "on"
+        aliases: []
+        description: "保护你看着的容器"
+      "off":
+        name: "off"
+        aliases: []
+        description: "移除你的保护"
+      password:
+        name: password
+        aliases: []
+        description: "设置密码（clear = 移除）"
+        args:
+          password: 密码
+      unlock:
+        name: unlock
+        aliases: []
+        description: "用密码打开容器"
+        args:
+          password: 密码
+  chestbuddy:
+    description: "可以打开你所有受保护容器的好友"
+    aliases: []
+    sub:
+      add:
+        name: add
+        aliases: []
+        description: "添加箱子好友"
+        args:
+          player: 玩家
+      remove:
+        name: remove
+        aliases: []
+        description: "移除箱子好友"
+        args:
+          player: 玩家
+      list:
+        name: list
+        aliases: []
+        description: "你的箱子好友"

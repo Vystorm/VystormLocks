@@ -1,0 +1,79 @@
+auto-protected: "<gray>🔒 Защищено. Открыть могут только ты и твои друзья по сундукам. <dark_gray>(/vlock)"
+protected: "<green>🔒 Этот контейнер теперь защищён."
+unprotected: "<yellow>🔓 Защита снята."
+already-yours: "<gray>Этот контейнер уже защищён тобой."
+locked: "<red>🔒 Заперто игроком <yellow>{owner}</yellow>."
+locked-password: "<red>🔒 Заперто игроком <yellow>{owner}</yellow>. <gray>Знаешь пароль? /vlock unlock ПАРОЛЬ"
+not-yours: "<red>Этот контейнер принадлежит <yellow>{owner}</yellow>."
+no-target: "<red>Посмотри на сундук или другой контейнер (макс. 6 блоков)."
+info-free: "<gray>Этот контейнер не защищён. <dark_gray>/vlock on"
+info: "<gold>🔒 Владелец: <yellow>{owner}</yellow> <gray>· Пароль: {password} · Друзья по сундукам: {buddies}"
+"yes": "да"
+"no": "нет"
+password-set: "<green>Пароль установлен. Другие открывают через /vlock unlock ПАРОЛЬ до выхода из игры."
+password-cleared: "<yellow>Пароль удалён."
+password-length: "<red>Пароль должен быть длиной 3–64 символа."
+no-password: "<red>У этого контейнера нет пароля."
+wrong-password: "<red>Неверный пароль."
+unlocked: "<green>🔓 Открыто для тебя до выхода из игры."
+unknown-player: "<red>Неизвестный игрок: {player}"
+buddy-self: "<red>Свои контейнеры ты можешь открывать всегда."
+buddy-limit: "<red>Можно иметь не больше {max} друзей по сундукам."
+buddy-added: "<green>{player} теперь может открывать все твои защищённые контейнеры."
+buddy-added-you: "<green>{player} добавил тебя в друзья по сундукам: ты можешь открывать его защищённые контейнеры."
+buddy-already: "<gray>{player} уже твой друг по сундукам."
+buddy-removed: "<yellow>{player} больше не твой друг по сундукам."
+buddy-missing: "<red>{player} не твой друг по сундукам."
+buddy-none: "<gray>Друзей по сундукам пока нет. /chestbuddy add ИМЯ"
+buddy-list: "<gold>Друзья по сундукам: <white>{players}"
+save-failed: "<red>Не удалось сохранить; смотри лог сервера."
+feature-off: "<red>Эта функция отключена на этом сервере."
+commands:
+  vlock:
+    description: "Защита контейнеров, пароль, открытие по паролю"
+    aliases: []
+    sub:
+      info:
+        name: info
+        aliases: []
+        description: "Кому принадлежит контейнер перед тобой"
+      "on":
+        name: "on"
+        aliases: []
+        description: "Защитить контейнер перед тобой"
+      "off":
+        name: "off"
+        aliases: []
+        description: "Снять свою защиту"
+      password:
+        name: password
+        aliases: []
+        description: "Установить пароль (clear = удалить)"
+        args:
+          password: ПАРОЛЬ
+      unlock:
+        name: unlock
+        aliases: []
+        description: "Открыть контейнер по паролю"
+        args:
+          password: ПАРОЛЬ
+  chestbuddy:
+    description: "Друзья, которые могут открывать все твои защищённые контейнеры"
+    aliases: []
+    sub:
+      add:
+        name: add
+        aliases: []
+        description: "Добавить друга по сундукам"
+        args:
+          player: ИГРОК
+      remove:
+        name: remove
+        aliases: []
+        description: "Удалить друга по сундукам"
+        args:
+          player: ИГРОК
+      list:
+        name: list
+        aliases: []
+        description: "Твои друзья по сундукам"

@@ -1,0 +1,79 @@
+auto-protected: "<gray>🔒 Protetto. Solo tu e i tuoi amici di forziere potete aprirlo. <dark_gray>(/vlock)"
+protected: "<green>🔒 Questo contenitore ora è protetto."
+unprotected: "<yellow>🔓 Protezione rimossa."
+already-yours: "<gray>Questo contenitore è già protetto da te."
+locked: "<red>🔒 Bloccato da <yellow>{owner}</yellow>."
+locked-password: "<red>🔒 Bloccato da <yellow>{owner}</yellow>. <gray>Conosci la password? /vlock unlock PASSWORD"
+not-yours: "<red>Questo contenitore appartiene a <yellow>{owner}</yellow>."
+no-target: "<red>Guarda un forziere o un altro contenitore (max. 6 blocchi)."
+info-free: "<gray>Questo contenitore non è protetto. <dark_gray>/vlock on"
+info: "<gold>🔒 Proprietario: <yellow>{owner}</yellow> <gray>· Password: {password} · Amici di forziere: {buddies}"
+"yes": "sì"
+"no": "no"
+password-set: "<green>Password impostata. Gli altri lo aprono con /vlock unlock PASSWORD fino alla disconnessione."
+password-cleared: "<yellow>Password rimossa."
+password-length: "<red>La password deve avere da 3 a 64 caratteri."
+no-password: "<red>Questo contenitore non ha una password."
+wrong-password: "<red>Password errata."
+unlocked: "<green>🔓 Sbloccato per te fino alla disconnessione."
+unknown-player: "<red>Giocatore sconosciuto: {player}"
+buddy-self: "<red>Puoi sempre aprire i tuoi contenitori."
+buddy-limit: "<red>Puoi avere al massimo {max} amici di forziere."
+buddy-added: "<green>{player} ora può aprire tutti i tuoi contenitori protetti."
+buddy-added-you: "<green>{player} ti ha aggiunto come amico di forziere: puoi aprire i suoi contenitori protetti."
+buddy-already: "<gray>{player} è già tuo amico di forziere."
+buddy-removed: "<yellow>{player} non è più tuo amico di forziere."
+buddy-missing: "<red>{player} non è tuo amico di forziere."
+buddy-none: "<gray>Ancora nessun amico di forziere. /chestbuddy add NOME"
+buddy-list: "<gold>Amici di forziere: <white>{players}"
+save-failed: "<red>Salvataggio non riuscito; vedi il log del server."
+feature-off: "<red>Questa funzione è disattivata su questo server."
+commands:
+  vlock:
+    description: "Proteggi contenitori, imposta una password, apri con la password"
+    aliases: []
+    sub:
+      info:
+        name: info
+        aliases: []
+        description: "Chi possiede il contenitore che guardi"
+      "on":
+        name: "on"
+        aliases: []
+        description: "Proteggi il contenitore che guardi"
+      "off":
+        name: "off"
+        aliases: []
+        description: "Rimuovi la tua protezione"
+      password:
+        name: password
+        aliases: []
+        description: "Imposta una password (clear = rimuovila)"
+        args:
+          password: PASSWORD
+      unlock:
+        name: unlock
+        aliases: []
+        description: "Apri un contenitore con la sua password"
+        args:
+          password: PASSWORD
+  chestbuddy:
+    description: "Amici che possono aprire tutti i tuoi contenitori protetti"
+    aliases: []
+    sub:
+      add:
+        name: add
+        aliases: []
+        description: "Aggiungi un amico di forziere"
+        args:
+          player: GIOCATORE
+      remove:
+        name: remove
+        aliases: []
+        description: "Rimuovi un amico di forziere"
+        args:
+          player: GIOCATORE
+      list:
+        name: list
+        aliases: []
+        description: "I tuoi amici di forziere"

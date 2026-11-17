@@ -1,0 +1,8 @@
+title: 'Locks'
+pages:
+  - title: 'Protected automatically'
+    text: |
+      Chests, barrels, shulker boxes, furnaces and hoppers you place are protected right away. Only you can open or break them. /vlock shows who owns the container you look at; /vlock off removes the protection.
+  - title: 'Buddies and passwords'
+    text: |
+      /chestbuddy add NAME lets a friend open all your protected containers. /vlock password WORD puts a password on one container: others open it with /vlock unlock WORD until they log out.

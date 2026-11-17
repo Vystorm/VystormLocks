@@ -1,0 +1,8 @@
+title: 'Serrature'
+pages:
+  - title: 'Protetto automaticamente'
+    text: |
+      Forzieri, barili, scatole shulker, fornaci e tramogge che piazzi sono protetti subito. Solo tu puoi aprirli o romperli. /vlock mostra di chi è il contenitore; /vlock off rimuove la protezione.
+  - title: 'Amici e password'
+    text: |
+      /chestbuddy add NOME permette a un amico di aprire tutti i tuoi contenitori protetti. /vlock password PAROLA mette una password su un contenitore: gli altri lo aprono con /vlock unlock PAROLA fino alla disconnessione.

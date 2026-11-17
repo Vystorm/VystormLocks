@@ -1,0 +1,8 @@
+title: 'Verrous'
+pages:
+  - title: 'Protégé automatiquement'
+    text: |
+      Les coffres, tonneaux, boîtes de shulker, fourneaux et entonnoirs que tu poses sont protégés tout de suite. Toi seul peux les ouvrir ou les casser. /vlock montre à qui appartient le conteneur ; /vlock off retire la protection.
+  - title: 'Amis et mots de passe'
+    text: |
+      /chestbuddy add NOM permet à un ami d'ouvrir tous tes conteneurs protégés. /vlock password MOT met un mot de passe sur un conteneur : les autres l'ouvrent avec /vlock unlock MOT jusqu'à leur déconnexion.

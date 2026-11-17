@@ -1,0 +1,8 @@
+title: 'Schlösser'
+pages:
+  - title: 'Automatisch geschützt'
+    text: |
+      Kisten, Fässer, Shulkerkisten, Öfen und Trichter, die du platzierst, sind sofort geschützt. Nur du kannst sie öffnen oder abbauen. /vlock zeigt, wem der Behälter gehört; /vlock aus entfernt den Schutz.
+  - title: 'Buddies und Passwörter'
+    text: |
+      /chestbuddy add NAME lässt einen Freund alle deine geschützten Behälter öffnen. /vlock passwort WORT setzt ein Passwort auf einen Behälter: Andere öffnen ihn mit /vlock entsperren WORT, bis sie sich ausloggen.

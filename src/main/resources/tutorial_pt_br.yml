@@ -1,0 +1,8 @@
+title: 'Trancas'
+pages:
+  - title: 'Protegido automaticamente'
+    text: |
+      Baús, barris, caixas de shulker, fornalhas e funis que você coloca ficam protegidos na hora. Só você pode abri-los ou quebrá-los. /vlock mostra de quem é o contêiner; /vlock off remove a proteção.
+  - title: 'Amigos e senhas'
+    text: |
+      /chestbuddy add NOME deixa um amigo abrir todos os seus contêineres protegidos. /vlock password PALAVRA coloca uma senha em um contêiner: outros abrem com /vlock unlock PALAVRA até saírem do jogo.

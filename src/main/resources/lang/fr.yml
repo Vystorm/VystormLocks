@@ -1,0 +1,79 @@
+auto-protected: "<gray>🔒 Protégé. Seuls toi et tes amis de coffre peuvent l'ouvrir. <dark_gray>(/vlock)"
+protected: "<green>🔒 Ce conteneur est maintenant protégé."
+unprotected: "<yellow>🔓 Protection retirée."
+already-yours: "<gray>Ce conteneur est déjà protégé par toi."
+locked: "<red>🔒 Verrouillé par <yellow>{owner}</yellow>."
+locked-password: "<red>🔒 Verrouillé par <yellow>{owner}</yellow>. <gray>Tu connais le mot de passe ? /vlock unlock MOT_DE_PASSE"
+not-yours: "<red>Ce conteneur appartient à <yellow>{owner}</yellow>."
+no-target: "<red>Regarde un coffre ou un autre conteneur (6 blocs max.)."
+info-free: "<gray>Ce conteneur n'est pas protégé. <dark_gray>/vlock on"
+info: "<gold>🔒 Propriétaire : <yellow>{owner}</yellow> <gray>· Mot de passe : {password} · Amis de coffre : {buddies}"
+"yes": "oui"
+"no": "non"
+password-set: "<green>Mot de passe défini. Les autres l'ouvrent avec /vlock unlock MOT_DE_PASSE jusqu'à leur déconnexion."
+password-cleared: "<yellow>Mot de passe retiré."
+password-length: "<red>Le mot de passe doit faire 3 à 64 caractères."
+no-password: "<red>Ce conteneur n'a pas de mot de passe."
+wrong-password: "<red>Mauvais mot de passe."
+unlocked: "<green>🔓 Déverrouillé pour toi jusqu'à ta déconnexion."
+unknown-player: "<red>Joueur inconnu : {player}"
+buddy-self: "<red>Tu peux toujours ouvrir tes propres conteneurs."
+buddy-limit: "<red>Tu peux avoir au plus {max} amis de coffre."
+buddy-added: "<green>{player} peut maintenant ouvrir tous tes conteneurs protégés."
+buddy-added-you: "<green>{player} t'a ajouté comme ami de coffre : tu peux ouvrir ses conteneurs protégés."
+buddy-already: "<gray>{player} est déjà ton ami de coffre."
+buddy-removed: "<yellow>{player} n'est plus ton ami de coffre."
+buddy-missing: "<red>{player} n'est pas ton ami de coffre."
+buddy-none: "<gray>Pas encore d'amis de coffre. /chestbuddy add NOM"
+buddy-list: "<gold>Amis de coffre : <white>{players}"
+save-failed: "<red>Échec de l'enregistrement ; voir le journal du serveur."
+feature-off: "<red>Cette fonction est désactivée sur ce serveur."
+commands:
+  vlock:
+    description: "Protéger des conteneurs, définir un mot de passe, ouvrir avec un mot de passe"
+    aliases: []
+    sub:
+      info:
+        name: info
+        aliases: []
+        description: "Qui possède le conteneur que tu regardes"
+      "on":
+        name: "on"
+        aliases: []
+        description: "Protéger le conteneur que tu regardes"
+      "off":
+        name: "off"
+        aliases: []
+        description: "Retirer ta protection"
+      password:
+        name: password
+        aliases: []
+        description: "Définir un mot de passe (clear = le retirer)"
+        args:
+          password: MOT_DE_PASSE
+      unlock:
+        name: unlock
+        aliases: []
+        description: "Ouvrir un conteneur avec son mot de passe"
+        args:
+          password: MOT_DE_PASSE
+  chestbuddy:
+    description: "Amis qui peuvent ouvrir tous tes conteneurs protégés"
+    aliases: []
+    sub:
+      add:
+        name: add
+        aliases: []
+        description: "Ajouter un ami de coffre"
+        args:
+          player: JOUEUR
+      remove:
+        name: remove
+        aliases: []
+        description: "Retirer un ami de coffre"
+        args:
+          player: JOUEUR
+      list:
+        name: list
+        aliases: []
+        description: "Tes amis de coffre"

@@ -1,0 +1,79 @@
+auto-protected: "<gray>🔒 Geschützt. Nur du und deine Kisten-Buddies können sie öffnen. <dark_gray>(/vlock)"
+protected: "<green>🔒 Dieser Behälter ist jetzt geschützt."
+unprotected: "<yellow>🔓 Schutz entfernt."
+already-yours: "<gray>Dieser Behälter ist schon von dir geschützt."
+locked: "<red>🔒 Gesperrt von <yellow>{owner}</yellow>."
+locked-password: "<red>🔒 Gesperrt von <yellow>{owner}</yellow>. <gray>Passwort bekannt? /vlock unlock PASSWORT"
+not-yours: "<red>Dieser Behälter gehört <yellow>{owner}</yellow>."
+no-target: "<red>Schau auf eine Kiste oder einen anderen Behälter (max. 6 Blöcke)."
+info-free: "<gray>Dieser Behälter ist nicht geschützt. <dark_gray>/vlock on"
+info: "<gold>🔒 Besitzer: <yellow>{owner}</yellow> <gray>· Passwort: {password} · Kisten-Buddies: {buddies}"
+"yes": "ja"
+"no": "nein"
+password-set: "<green>Passwort gesetzt. Andere öffnen mit /vlock unlock PASSWORT, bis sie sich ausloggen."
+password-cleared: "<yellow>Passwort entfernt."
+password-length: "<red>Das Passwort braucht 3–64 Zeichen."
+no-password: "<red>Dieser Behälter hat kein Passwort."
+wrong-password: "<red>Falsches Passwort."
+unlocked: "<green>🔓 Für dich entsperrt, bis du dich ausloggst."
+unknown-player: "<red>Unbekannter Spieler: {player}"
+buddy-self: "<red>Deine eigenen Behälter kannst du immer öffnen."
+buddy-limit: "<red>Du kannst höchstens {max} Kisten-Buddies haben."
+buddy-added: "<green>{player} kann jetzt alle deine geschützten Behälter öffnen."
+buddy-added-you: "<green>{player} hat dich als Kisten-Buddy hinzugefügt: Du kannst seine geschützten Behälter öffnen."
+buddy-already: "<gray>{player} ist schon dein Kisten-Buddy."
+buddy-removed: "<yellow>{player} ist nicht mehr dein Kisten-Buddy."
+buddy-missing: "<red>{player} ist nicht dein Kisten-Buddy."
+buddy-none: "<gray>Noch keine Kisten-Buddies. /chestbuddy add NAME"
+buddy-list: "<gold>Kisten-Buddies: <white>{players}"
+save-failed: "<red>Speichern fehlgeschlagen; siehe Server-Log."
+feature-off: "<red>Dieses Feature ist auf diesem Server ausgeschaltet."
+commands:
+  vlock:
+    description: "Behälter schützen, Passwort setzen, mit Passwort öffnen"
+    aliases: []
+    sub:
+      info:
+        name: info
+        aliases: []
+        description: "Wem der Behälter gehört, auf den du schaust"
+      "on":
+        name: "an"
+        aliases: []
+        description: "Den Behälter schützen, auf den du schaust"
+      "off":
+        name: "aus"
+        aliases: []
+        description: "Deinen Schutz entfernen"
+      password:
+        name: passwort
+        aliases: []
+        description: "Passwort setzen (clear = entfernen)"
+        args:
+          password: PASSWORT
+      unlock:
+        name: entsperren
+        aliases: []
+        description: "Einen Behälter mit Passwort öffnen"
+        args:
+          password: PASSWORT
+  chestbuddy:
+    description: "Freunde, die alle deine geschützten Behälter öffnen dürfen"
+    aliases: []
+    sub:
+      add:
+        name: add
+        aliases: []
+        description: "Kisten-Buddy hinzufügen"
+        args:
+          player: SPIELER
+      remove:
+        name: remove
+        aliases: []
+        description: "Kisten-Buddy entfernen"
+        args:
+          player: SPIELER
+      list:
+        name: list
+        aliases: []
+        description: "Deine Kisten-Buddies"

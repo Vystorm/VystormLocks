@@ -1,0 +1,79 @@
+auto-protected: "<gray>🔒 Protected. Only you and your chest buddies can open it. <dark_gray>(/vlock)"
+protected: "<green>🔒 This container is protected now."
+unprotected: "<yellow>🔓 Protection removed."
+already-yours: "<gray>This container is already protected by you."
+locked: "<red>🔒 Locked by <yellow>{owner}</yellow>."
+locked-password: "<red>🔒 Locked by <yellow>{owner}</yellow>. <gray>Know the password? /vlock unlock PASSWORD"
+not-yours: "<red>This container belongs to <yellow>{owner}</yellow>."
+no-target: "<red>Look at a chest or another container (max. 6 blocks)."
+info-free: "<gray>This container is not protected. <dark_gray>/vlock on"
+info: "<gold>🔒 Owner: <yellow>{owner}</yellow> <gray>· Password: {password} · Chest buddies: {buddies}"
+"yes": "yes"
+"no": "no"
+password-set: "<green>Password set. Others can open it with /vlock unlock PASSWORD until they log out."
+password-cleared: "<yellow>Password removed."
+password-length: "<red>Use 3–64 characters for the password."
+no-password: "<red>This container has no password."
+wrong-password: "<red>Wrong password."
+unlocked: "<green>🔓 Unlocked for you until you log out."
+unknown-player: "<red>Unknown player: {player}"
+buddy-self: "<red>You can always open your own containers."
+buddy-limit: "<red>You can have at most {max} chest buddies."
+buddy-added: "<green>{player} can now open all your protected containers."
+buddy-added-you: "<green>{player} added you as a chest buddy: you can open their protected containers."
+buddy-already: "<gray>{player} is already your chest buddy."
+buddy-removed: "<yellow>{player} is no longer your chest buddy."
+buddy-missing: "<red>{player} is not your chest buddy."
+buddy-none: "<gray>No chest buddies yet. /chestbuddy add NAME"
+buddy-list: "<gold>Chest buddies: <white>{players}"
+save-failed: "<red>Saving failed; see the server log."
+feature-off: "<red>This feature is turned off on this server."
+commands:
+  vlock:
+    description: "Protect containers, set a password, unlock with a password"
+    aliases: []
+    sub:
+      info:
+        name: info
+        aliases: []
+        description: "Who owns the container you look at"
+      "on":
+        name: "on"
+        aliases: []
+        description: "Protect the container you look at"
+      "off":
+        name: "off"
+        aliases: []
+        description: "Remove your protection"
+      password:
+        name: password
+        aliases: []
+        description: "Set a password (clear = remove it)"
+        args:
+          password: PASSWORD
+      unlock:
+        name: unlock
+        aliases: []
+        description: "Open a container with its password"
+        args:
+          password: PASSWORD
+  chestbuddy:
+    description: "Friends who may open all your protected containers"
+    aliases: []
+    sub:
+      add:
+        name: add
+        aliases: []
+        description: "Add a chest buddy"
+        args:
+          player: PLAYER
+      remove:
+        name: remove
+        aliases: []
+        description: "Remove a chest buddy"
+        args:
+          player: PLAYER
+      list:
+        name: list
+        aliases: []
+        description: "Your chest buddies"

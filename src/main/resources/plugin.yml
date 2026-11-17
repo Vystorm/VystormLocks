@@ -1,0 +1,15 @@
+name: VystormLocks
+version: '${version}'
+main: at.esoren.vystormlocks.LocksPlugin
+api-version: '1.20.6'
+author: Esoren
+depend: [vystorm_core]
+website: https://vystorm.net
+description: "Protect chests and other containers: automatic protection, buddies and optional passwords."
+permissions:
+  vystormlocks.use:
+    description: Protect own containers, set passwords and manage chest buddies.
+    default: true
+  vystormlocks.bypass:
+    description: Open, break and manage every protected container.
+    default: op
