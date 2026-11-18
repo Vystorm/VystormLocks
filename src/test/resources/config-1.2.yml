@@ -1,0 +1,41 @@
+# Vystorm Locks: containers you place are protected automatically. Only you, your chest buddies
+# (/chestbuddy add NAME) and players who know the container's password (/vlock unlock PASSWORD) may open it.
+# Texts: plugins/VystormLocks/lang/<language>.yml (Vystorm Core language system).
+
+# Protect containers automatically when they are placed.
+auto-protect: true
+
+# Blocks that can be protected. Names of Minecraft materials; "*" matches any part (e.g. *_SHULKER_BOX).
+protect:
+  - CHEST
+  - TRAPPED_CHEST
+  - "*COPPER_CHEST"
+  - BARREL
+  - "*SHULKER_BOX"
+  - FURNACE
+  - BLAST_FURNACE
+  - SMOKER
+  - HOPPER
+  - DISPENSER
+  - DROPPER
+  - BREWING_STAND
+  - CRAFTER
+  - CHISELED_BOOKSHELF
+
+# Hoppers and hopper minecarts may only take items out of a protected container when the hopper is
+# protected by the same owner (hoppers are protected when placed). false = hoppers may always pull.
+hopper-protection: true
+
+# Explosions (creepers, TNT, beds ...) never destroy protected containers.
+explosion-protection: true
+
+# Chest buddies (/chestbuddy): friends who may open everything a player protected. false = buddies give no access
+# and the command is off; the saved buddy lists stay.
+chest-buddies: true
+
+# Passwords on single containers (/vlock password, /vlock unlock). false = passwords give no access and both
+# commands are off; saved passwords stay.
+passwords: true
+
+# Maximum chest buddies per player.
+max-buddies: 32

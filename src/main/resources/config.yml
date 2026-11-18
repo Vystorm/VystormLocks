@@ -1,8 +1,17 @@
 # Vystorm Locks: containers you place are protected automatically. Only you, your chest buddies
 # (/chestbuddy add NAME) and players who know the container's password (/vlock unlock PASSWORD) may open it.
 # Texts: plugins/VystormLocks/lang/<language>.yml (Vystorm Core language system).
+#
+# Every feature has an on/off switch (all on by default). They are listed in Vystorm Core's /vadmin features and apply
+# at once without a restart, except tutorial.enabled. A switched-off feature does nothing, its commands answer "This
+# feature is switched off on this server." and its placeholders are empty. Locks, passwords and buddy lists stay saved.
 
-# Protect containers automatically when they are placed.
+# The container protection itself. Off: no container is protected (anyone may open and break them), /vlock and
+# /chestbuddy are switched off; every lock stays saved and protects again when it is back on.
+locks:
+  enabled: true
+
+# Protect containers automatically when they are placed (a switch, listed in /vadmin features).
 auto-protect: true
 
 # Blocks that can be protected. Names of Minecraft materials; "*" matches any part (e.g. *_SHULKER_BOX).
@@ -26,6 +35,19 @@ protect:
 # protected by the same owner (hoppers are protected when placed). false = hoppers may always pull.
 hopper-protection: true
 
+# Pistons cannot push or pull protected blocks (most containers cannot be moved by pistons in vanilla anyway).
+# Off: the plugin no longer stops pistons.
+piston-protection:
+  enabled: true
+
+# Withers and other mobs that change blocks (endermen, ravagers ...) cannot break protected containers.
+wither-protection:
+  enabled: true
+
+# Fire does not burn protected containers (barrels, chiseled bookshelves ...).
+fire-protection:
+  enabled: true
+
 # Explosions (creepers, TNT, beds ...) never destroy protected containers.
 explosion-protection: true
 
@@ -37,5 +59,14 @@ chest-buddies: true
 # commands are off; saved passwords stay.
 passwords: true
 
+# /vlock, /vlock on and /vlock off: show the owner, protect by hand, remove the protection. Off: these are switched
+# off; automatic protection keeps working.
+manual-locks:
+  enabled: true
+
 # Maximum chest buddies per player.
 max-buddies: 32
+
+# Tutorial in the Vystorm Core main menu (/vmenu -> Tutorials). Needs a server restart to apply.
+tutorial:
+  enabled: true

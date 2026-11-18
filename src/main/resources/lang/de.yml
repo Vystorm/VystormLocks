@@ -27,7 +27,7 @@ buddy-missing: "<red>{player} ist nicht dein Kisten-Buddy."
 buddy-none: "<gray>Noch keine Kisten-Buddies. /chestbuddy add NAME"
 buddy-list: "<gold>Kisten-Buddies: <white>{players}"
 save-failed: "<red>Speichern fehlgeschlagen; siehe Server-Log."
-feature-off: "<red>Dieses Feature ist auf diesem Server ausgeschaltet."
+feature-off: "<red>Diese Funktion ist auf diesem Server ausgeschaltet."
 commands:
   vlock:
     description: "Behälter schützen, Passwort setzen, mit Passwort öffnen"
@@ -77,3 +77,20 @@ commands:
         name: list
         aliases: []
         description: "Deine Kisten-Buddies"
+feature-needs: "<red>Dafür braucht es den Schalter {switch}, der auf diesem Server aus ist."
+switches:
+  locks: "Das ganze Plugin: Schutz von Behältern"
+  auto-protect: "Behälter beim Setzen schützen"
+  manual: "Mit /vlock von Hand schützen und freigeben"
+  buddies: "Kistenfreunde"
+  passwords: "Passwörter auf Behältern"
+  hoppers: "Trichter ziehen nicht aus fremden Behältern"
+  explosions: "Explosionen lassen geschützte Behälter stehen"
+  pistons: "Kolben bewegen geschützte Behälter nicht"
+  withers: "Wither und Mobs zerstören geschützte Behälter nicht"
+  fire: "Feuer verbrennt geschützte Behälter nicht"
+  tutorial: "Tutorial im Hauptmenü (braucht einen Neustart)"
+placeholder:
+  buddies_count: "Kistenfreunde des Spielers"
+  locks_count: "Behälter, die der Spieler geschützt hat"
+  locks_total: "Geschützte Blöcke auf dem Server"

@@ -27,7 +27,7 @@ buddy-missing: "<red>{player} is not your chest buddy."
 buddy-none: "<gray>No chest buddies yet. /chestbuddy add NAME"
 buddy-list: "<gold>Chest buddies: <white>{players}"
 save-failed: "<red>Saving failed; see the server log."
-feature-off: "<red>This feature is turned off on this server."
+feature-off: "<red>This feature is switched off on this server."
 commands:
   vlock:
     description: "Protect containers, set a password, unlock with a password"
@@ -77,3 +77,20 @@ commands:
         name: list
         aliases: []
         description: "Your chest buddies"
+feature-needs: "<red>This needs the switch {switch}, which is off on this server."
+switches:
+  locks: "The whole plugin: container protection"
+  auto-protect: "Protect containers when they are placed"
+  manual: "Protect and unprotect by hand with /vlock"
+  buddies: "Chest buddies"
+  passwords: "Passwords on containers"
+  hoppers: "Hoppers cannot pull from other players' containers"
+  explosions: "Explosions leave protected containers"
+  pistons: "Pistons cannot move protected containers"
+  withers: "Withers and mobs cannot break protected containers"
+  fire: "Fire does not burn protected containers"
+  tutorial: "Tutorial in the main menu (needs a restart)"
+placeholder:
+  buddies_count: "Chest buddies of the player"
+  locks_count: "Containers the player protected"
+  locks_total: "Protected blocks on the server"

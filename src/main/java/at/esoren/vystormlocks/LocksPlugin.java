@@ -49,27 +49,56 @@ public final class LocksPlugin extends JavaPlugin implements Listener {
     private Patterns patterns = Patterns.NONE;
     /** Containers a player unlocked with the password this session. */
     private final Map<UUID, Set<String>> unlocked = new HashMap<>();
+    /** Every feature switch as read in loadSettings; null (= all on) until then and in tests that build the plugin by hand. */
+    private volatile Feature.Switches switches;
+    /** The switches online players last got their command list for (null before the first registration). */
+    private Feature.Switches commandSwitches;
+
+    /** Minimum Vystorm Core: placeholders through api.placeholders(). */
+    static final String MIN_CORE = "0.65.0";
+
+    /** Whether a feature (and locks.enabled) is on; static so tests with a mocked plugin read the real field. */
+    static boolean enabled(LocksPlugin plugin, Feature feature) {
+        Feature.Switches current = plugin == null ? null : plugin.switches;
+        return current == null || current.on(feature);
+    }
+
+    boolean on(Feature feature) { return enabled(this, feature); }
+
+    /** The five switches of 1.1.0 are read from the config on every event, as before, and also follow locks.enabled. */
+    private boolean live(Feature feature) { return on(feature) && getConfig().getBoolean(feature.path, true); }
+
+    /** True (and the shared message sent) when the feature is off; names locks.enabled when only that one is off. */
+    boolean off(CommandSender sender, Feature feature) {
+        if (on(feature)) return false;
+        Feature.Switches current = switches;
+        if (feature != Feature.LOCKS && current != null && !current.off().contains(feature)) lang.send(sender, "feature-needs", "switch", Feature.LOCKS.path);
+        else lang.send(sender, "feature-off");
+        return true;
+    }
 
     @Override
     public void onEnable() {
-        if (!CoreApi.atLeast("0.64.0")) {
-            getLogger().severe("Vystorm Core 0.64.0 or newer is required; please update Core first.");
+        if (!CoreApi.atLeast(MIN_CORE)) {
+            getLogger().severe("Vystorm Core " + MIN_CORE + " or newer is required; please update Core first.");
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
         core = CoreApi.api().orElseThrow();
         saveDefaultConfig();
         loadSettings();
-        registerSettings();
         lang = core.lang().register(this);
-        try { core.registerTutorial(this); } catch (RuntimeException noTutorial) { getLogger().fine("Tutorial not registered: " + noTutorial); }
+        registerSettings();
+        // tutorial.enabled is read once: Core lists tutorials when a plugin starts
+        if (on(Feature.TUTORIAL)) try { core.registerTutorial(this); } catch (RuntimeException noTutorial) { getLogger().fine("Tutorial not registered: " + noTutorial); }
         core.admin().updates().spigot(this, 140627);
         store = new LockStore(getDataFolder().toPath().resolve("locks.yml"), core.data().files());
         getServer().getPluginManager().registerEvents(this, this);
         handleBlockEvents(core.priority().stages());
         handleProtectionEvents(core.priority().stages());
-        core.command().register(this, lang, vlock(this));
-        core.command().register(this, lang, chestbuddy(this));
+        try { registerPlaceholders(core.placeholders()); }
+        catch (RuntimeException failure) { getLogger().log(java.util.logging.Level.WARNING, "Placeholders not registered", failure); }
+        registerCommands();
         getLogger().info(store.size() + " protected blocks loaded.");
     }
 
@@ -183,6 +212,13 @@ public final class LocksPlugin extends JavaPlugin implements Listener {
     void loadSettings() {
         reloadConfig();
         patterns = Patterns.of(getConfig().getStringList("protect").stream().map(s -> s.toUpperCase(Locale.ROOT)).toList());
+        switches = Feature.Switches.read(getConfig());
+        // help and tab completion ask the switches at every completion; when one changed, online players get their
+        // command list again (the commands are not registered again)
+        if (commandSwitches != null && !commandSwitches.equals(switches)) {
+            commandSwitches = switches;
+            try { core.command().refresh(); } catch (RuntimeException failure) { getLogger().warning("Command lists could not be sent again: " + failure); }
+        }
     }
 
     /** Core's config editor and feature switches (/vadmin config, /vadmin features). */
@@ -190,14 +226,16 @@ public final class LocksPlugin extends JavaPlugin implements Listener {
         try {
             var config = core.settings().config();
             config.register(this, "config.yml", this::loadSettings);
-            for (String feature : List.of("auto-protect", "hopper-protection", "explosion-protection", "chest-buddies", "passwords"))
-                config.feature(this, feature);
+            for (Feature feature : Feature.values()) {
+                config.feature(this, feature.path, null, lang.ref(feature.description()));
+                if (feature.needsRestart()) config.activation(this, feature.path, Vystorm.vystorm_core._uiMethods.settings.SettingPolicy.Activation.RESTART);
+            }
         } catch (RuntimeException failure) { getLogger().fine("Config editor not registered: " + failure); }
     }
 
     /** Feature switches (1.1.0): off = buddies and passwords give no access and their commands say so; saved data stays. */
-    boolean buddies() { return getConfig().getBoolean("chest-buddies", true); }
-    boolean passwords() { return getConfig().getBoolean("passwords", true); }
+    boolean buddies() { return live(Feature.BUDDIES); }
+    boolean passwords() { return live(Feature.PASSWORDS); }
 
     String name(UUID id) {
         OfflinePlayer p = Bukkit.getOfflinePlayer(id);
@@ -215,6 +253,7 @@ public final class LocksPlugin extends JavaPlugin implements Listener {
 
     /** Stage PROTECT, registered in {@link #handleBlockEvents}. */
     public void place(BlockPlaceEvent event) {
+        if (!on(Feature.LOCKS)) return; // locks.enabled off: nothing is protected
         Block block = event.getBlockPlaced();
         if (!protectable(block)) return;
         Player player = event.getPlayer();
@@ -241,7 +280,7 @@ public final class LocksPlugin extends JavaPlugin implements Listener {
             store.remove(key(block));   // a lock left on this spot by a block that vanished without being broken
             boolean partnerLocked = false;
             for (Block n : joinCandidates(block)) partnerLocked |= store.get(key(n)).isPresent();
-            if (partnerLocked || !getConfig().getBoolean("auto-protect", true) || !player.hasPermission(USE)) return;
+            if (partnerLocked || !live(Feature.AUTO_PROTECT) || !player.hasPermission(USE)) return;
             store.put(key(block), new LockStore.Lock(player.getUniqueId(), null, null));
             lang.send(player, "auto-protected");
         } catch (IOException failure) { fail(player, failure); }
@@ -249,7 +288,7 @@ public final class LocksPlugin extends JavaPlugin implements Listener {
 
     /** Stage PROTECT, registered in {@link #handleProtectionEvents}. */
     public void interact(PlayerInteractEvent event) {
-        if (event.getAction() != Action.RIGHT_CLICK_BLOCK || event.getClickedBlock() == null) return;
+        if (!on(Feature.LOCKS) || event.getAction() != Action.RIGHT_CLICK_BLOCK || event.getClickedBlock() == null) return;
         Block block = event.getClickedBlock();
         if (!protectable(block)) return;
         // every lock of a double chest must allow it
@@ -263,6 +302,7 @@ public final class LocksPlugin extends JavaPlugin implements Listener {
 
     /** Stage PROTECT, registered in {@link #handleBlockEvents}. */
     public void breaking(BlockBreakEvent event) {
+        if (!on(Feature.LOCKS)) return;
         Block block = event.getBlock();
         if (!protectable(block)) return;
         for (Map.Entry<String, LockStore.Lock> entry : locks(block)) {
@@ -289,37 +329,37 @@ public final class LocksPlugin extends JavaPlugin implements Listener {
 
     /** Stage PROTECT, registered in {@link #handleProtectionEvents}. */
     public void pistonExtend(BlockPistonExtendEvent event) {
-        for (Block b : event.getBlocks()) if (protectable(b) && lockOf(b).isPresent()) { event.setCancelled(true); return; }
+        if (on(Feature.PISTONS)) for (Block b : event.getBlocks()) if (protectable(b) && lockOf(b).isPresent()) { event.setCancelled(true); return; }
     }
 
     /** Stage PROTECT, registered in {@link #handleProtectionEvents}. */
     public void pistonRetract(BlockPistonRetractEvent event) {
-        for (Block b : event.getBlocks()) if (protectable(b) && lockOf(b).isPresent()) { event.setCancelled(true); return; }
+        if (on(Feature.PISTONS)) for (Block b : event.getBlocks()) if (protectable(b) && lockOf(b).isPresent()) { event.setCancelled(true); return; }
     }
 
     /** Withers (and other entities) breaking blocks. Stage PROTECT, registered in {@link #handleProtectionEvents}. */
     public void entityChange(EntityChangeBlockEvent event) {
-        if (protectable(event.getBlock()) && lockOf(event.getBlock()).isPresent()) event.setCancelled(true);
+        if (on(Feature.WITHERS) && protectable(event.getBlock()) && lockOf(event.getBlock()).isPresent()) event.setCancelled(true);
     }
 
     /** Stage PROTECT, registered in {@link #handleProtectionEvents}. */
     public void burn(BlockBurnEvent event) {
-        if (protectable(event.getBlock()) && lockOf(event.getBlock()).isPresent()) event.setCancelled(true);
+        if (on(Feature.FIRE) && protectable(event.getBlock()) && lockOf(event.getBlock()).isPresent()) event.setCancelled(true);
     }
 
     /** Stage PROTECT, registered in {@link #handleProtectionEvents}. */
     public void entityExplode(EntityExplodeEvent event) {
-        if (getConfig().getBoolean("explosion-protection", true)) event.blockList().removeIf(b -> protectable(b) && lockOf(b).isPresent());
+        if (live(Feature.EXPLOSIONS)) event.blockList().removeIf(b -> protectable(b) && lockOf(b).isPresent());
     }
 
     /** Stage PROTECT, registered in {@link #handleProtectionEvents}. */
     public void blockExplode(BlockExplodeEvent event) {
-        if (getConfig().getBoolean("explosion-protection", true)) event.blockList().removeIf(b -> protectable(b) && lockOf(b).isPresent());
+        if (live(Feature.EXPLOSIONS)) event.blockList().removeIf(b -> protectable(b) && lockOf(b).isPresent());
     }
 
     /** Stage PROTECT, registered in {@link #handleProtectionEvents}. */
     public void hopper(InventoryMoveItemEvent event) {
-        if (!getConfig().getBoolean("hopper-protection", true)) return;
+        if (!live(Feature.HOPPERS)) return;
         Location from = event.getSource().getLocation();
         if (from == null) return;
         Block source = from.getBlock();
@@ -343,6 +383,7 @@ public final class LocksPlugin extends JavaPlugin implements Listener {
     }
 
     void info(Player player) {
+        if (off(player, Feature.MANUAL)) return;
         Block block = target(player);
         if (block == null) return;
         Optional<Map.Entry<String, LockStore.Lock>> lock = lockOf(block);
@@ -353,6 +394,7 @@ public final class LocksPlugin extends JavaPlugin implements Listener {
     }
 
     void protect(Player player) {
+        if (off(player, Feature.MANUAL)) return;
         Block block = target(player);
         if (block == null) return;
         Optional<Map.Entry<String, LockStore.Lock>> lock = lockOf(block);
@@ -377,6 +419,7 @@ public final class LocksPlugin extends JavaPlugin implements Listener {
     }
 
     void unprotect(Player player) {
+        if (off(player, Feature.MANUAL)) return;
         owned(player).ifPresent(entry -> {
             try { store.remove(entry.getKey()); lang.send(player, "unprotected"); }
             catch (IOException failure) { fail(player, failure); }
@@ -384,7 +427,7 @@ public final class LocksPlugin extends JavaPlugin implements Listener {
     }
 
     void password(Player player, String password) {
-        if (!passwords()) { lang.send(player, "feature-off"); return; }
+        if (off(player, Feature.PASSWORDS)) return;
         owned(player).ifPresent(entry -> {
             boolean clear = password == null || password.equalsIgnoreCase("clear") || password.equalsIgnoreCase("-");
             if (!clear && (password.length() < 3 || password.length() > 64)) { lang.send(player, "password-length"); return; }
@@ -396,7 +439,7 @@ public final class LocksPlugin extends JavaPlugin implements Listener {
     }
 
     void unlock(Player player, String password) {
-        if (!passwords()) { lang.send(player, "feature-off"); return; }
+        if (off(player, Feature.PASSWORDS)) return;
         Block block = target(player);
         if (block == null) return;
         Optional<Map.Entry<String, LockStore.Lock>> lock = lockOf(block);
@@ -407,7 +450,7 @@ public final class LocksPlugin extends JavaPlugin implements Listener {
     }
 
     void buddyAdd(Player player, String name) {
-        if (!buddies()) { lang.send(player, "feature-off"); return; }
+        if (off(player, Feature.BUDDIES)) return;
         OfflinePlayer buddy = resolve(name);
         if (buddy == null) { lang.send(player, "unknown-player", "player", name); return; }
         if (buddy.getUniqueId().equals(player.getUniqueId())) { lang.send(player, "buddy-self"); return; }
@@ -424,7 +467,7 @@ public final class LocksPlugin extends JavaPlugin implements Listener {
     }
 
     void buddyRemove(Player player, String name) {
-        if (!buddies()) { lang.send(player, "feature-off"); return; }
+        if (off(player, Feature.BUDDIES)) return;
         OfflinePlayer buddy = resolve(name);
         try {
             if (buddy != null && store.removeBuddy(player.getUniqueId(), buddy.getUniqueId())) lang.send(player, "buddy-removed", "player", buddy.getName());
@@ -433,7 +476,7 @@ public final class LocksPlugin extends JavaPlugin implements Listener {
     }
 
     void buddyList(Player player) {
-        if (!buddies()) { lang.send(player, "feature-off"); return; }
+        if (off(player, Feature.BUDDIES)) return;
         Set<UUID> list = store.buddies(player.getUniqueId());
         if (list.isEmpty()) lang.send(player, "buddy-none");
         else lang.send(player, "buddy-list", "players", String.join(", ", list.stream().map(this::name).toList()));
@@ -449,23 +492,46 @@ public final class LocksPlugin extends JavaPlugin implements Listener {
         return offline.hasPlayedBefore() ? offline : null;
     }
 
+    /**
+     * Lists a command in help and tab completion only while its switch (and locks.enabled) is on, asked at every
+     * completion so a switch applies at once; while off it still answers the off message.
+     */
+    static CommandSpec.Builder gate(CommandSpec.Builder node, LocksPlugin p, Feature feature) {
+        return p == null ? node : node.visibleWhen(() -> enabled(p, feature));
+    }
+
+    /** Registers /vlock and /chestbuddy once; their nodes follow the switches by themselves. */
+    private void registerCommands() {
+        commandSwitches = switches == null ? Feature.Switches.without() : switches;
+        core.command().register(this, lang, vlock(this));
+        core.command().register(this, lang, chestbuddy(this));
+    }
+
+    /** The namespace {@code locks}: buddies and protected containers (server thread; empty while switched off). */
+    void registerPlaceholders(Vystorm.vystorm_core._advancedMethods.placeholderHandler.PlaceholderInterface registry) {
+        LocksPlaceholders.register(registry, this, new LocksPlaceholders.Source() {
+            @Override public boolean on(Feature feature) { return LocksPlugin.this.on(feature); }
+            @Override public LockStore store() { return store; }
+        }, key -> lang == null ? key : lang.ref(key));
+    }
+
     static CommandSpec vlock(LocksPlugin p) {
-        return CommandSpec.command("vlock")
+        return gate(CommandSpec.command("vlock"), p, Feature.LOCKS)
                 .aliases("lock")
                 .playerOnly().permission(USE)
                 .executes(ctx -> p.info(ctx.player()))
-                .sub("info", s -> s.playerOnly().executes(ctx -> p.info(ctx.player())))
-                .sub("on", s -> s.playerOnly().executes(ctx -> p.protect(ctx.player())))
-                .sub("off", s -> s.playerOnly().executes(ctx -> p.unprotect(ctx.player())))
-                .sub("password", s -> s.playerOnly().arg(Arg.word("password").optional())
+                .sub("info", s -> gate(s, p, Feature.MANUAL).playerOnly().executes(ctx -> p.info(ctx.player())))
+                .sub("on", s -> gate(s, p, Feature.MANUAL).playerOnly().executes(ctx -> p.protect(ctx.player())))
+                .sub("off", s -> gate(s, p, Feature.MANUAL).playerOnly().executes(ctx -> p.unprotect(ctx.player())))
+                .sub("password", s -> gate(s, p, Feature.PASSWORDS).playerOnly().arg(Arg.word("password").optional())
                         .executes(ctx -> p.password(ctx.player(), ctx.input("password"))))
-                .sub("unlock", s -> s.playerOnly().arg(Arg.word("password"))
+                .sub("unlock", s -> gate(s, p, Feature.PASSWORDS).playerOnly().arg(Arg.word("password"))
                         .executes(ctx -> p.unlock(ctx.player(), ctx.get("password"))))
                 .build();
     }
 
     static CommandSpec chestbuddy(LocksPlugin p) {
-        return CommandSpec.command("chestbuddy")
+        return gate(CommandSpec.command("chestbuddy"), p, Feature.BUDDIES)
                 .playerOnly().permission(USE)
                 .executes(ctx -> p.buddyList(ctx.player()))
                 .sub("add", s -> s.playerOnly().arg(Arg.playerName("player")).executes(ctx -> p.buddyAdd(ctx.player(), ctx.get("player"))))

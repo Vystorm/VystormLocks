@@ -72,6 +72,8 @@ final class LockStore {
 
     Optional<Lock> get(String key) { return Optional.ofNullable(locks.get(key)); }
     int size() { return locks.size(); }
+    /** Containers one player protected (placeholders; walks every lock, so callers cache it). */
+    int count(UUID owner) { int n = 0; for (Lock lock : locks.values()) if (lock.owner().equals(owner)) n++; return n; }
 
     void put(String key, Lock lock) throws IOException { locks.put(key, lock); save(); }
     boolean remove(String key) throws IOException {
