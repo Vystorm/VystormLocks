@@ -1,3 +1,9 @@
+## 1.3.2 — 2026-11-20
+
+- Placing or breaking a container no longer writes the whole `locks.yml` again on the server thread. Changes are collected and written together at most every 5 seconds by a background thread, so large storage rooms and hopper sorters no longer cost a short stall with every block placed.
+- A normal server stop writes every change. After a crash, at most the changes of the last 5 seconds are lost: containers placed in that time are unprotected again and can be locked with `/vlock on`.
+- The file format is unchanged, so 1.3.1 reads the file as before.
+
 ## 1.3.1 — 2026-11-20
 
 - A damaged `locks.yml` no longer loses the locks: a file with a YAML syntax error is no longer replaced by a nearly empty file. The console names the line and column of the error; the file stays as it is until a lock or buddy changes, and is then first copied to `locks.yml.broken-<date>` (named in the console), so the saved locks can be recovered. While the file is broken its locks are not loaded, so fix it and restart.

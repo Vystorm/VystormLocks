@@ -9,6 +9,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.*;
+import java.util.concurrent.Executor;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -88,37 +89,109 @@ final class LockStore {
     /** Containers one player protected (placeholders; walks every lock, so callers cache it). */
     int count(UUID owner) { int n = 0; for (Lock lock : locks.values()) if (lock.owner().equals(owner)) n++; return n; }
 
-    void put(String key, Lock lock) throws IOException { locks.put(key, lock); save(); }
+    void put(String key, Lock lock) throws IOException { locks.put(key, lock); changed(); }
     boolean remove(String key) throws IOException {
         if (locks.remove(key) == null) return false;
-        save(); return true;
+        changed(); return true;
     }
 
     Set<UUID> buddies(UUID owner) { return Collections.unmodifiableSet(buddies.getOrDefault(owner, Set.of())); }
     boolean isBuddy(UUID owner, UUID player) { return buddies.getOrDefault(owner, Set.of()).contains(player); }
     boolean addBuddy(UUID owner, UUID buddy) throws IOException {
         boolean added = buddies.computeIfAbsent(owner, k -> new LinkedHashSet<>()).add(buddy);
-        if (added) save();
+        if (added) changed();
         return added;
     }
     boolean removeBuddy(UUID owner, UUID buddy) throws IOException {
         Set<UUID> set = buddies.get(owner);
         if (set == null || !set.remove(buddy)) return false;
         if (set.isEmpty()) buddies.remove(owner);
-        save(); return true;
+        changed(); return true;
     }
 
-    private void save() throws IOException {
+    // ---- saving (1.3.2) -------------------------------------------------------------------------------------------
+    // Before 1.3.2 every change built and wrote the whole file on the server thread. With deferred writes a change
+    // only marks the store; flush() (every few seconds, server thread) copies the maps and hands the copy to one
+    // writer thread, which builds the YAML and writes it atomically. Copies are written in the order they were taken,
+    // so the file always ends with the newest state. close() (plugin stop) waits for the writer and writes what is
+    // left, so a clean stop loses nothing; a crash loses at most the changes since the last flush.
+
+    /** The writer of deferred saves; null = every change is written at once (the behaviour before 1.3.2). */
+    private Executor writer;
+    /** Changes since the last copy handed to the writer (set again when a write failed, so the next flush retries). */
+    private final java.util.concurrent.atomic.AtomicBoolean dirty = new java.util.concurrent.atomic.AtomicBoolean();
+    private final Object writing = new Object();
+
+    /** The state to write: copies taken on the server thread. */
+    private record Snapshot(Map<String, Lock> locks, Map<UUID, List<UUID>> buddies) {}
+
+    /**
+     * Switches to deferred writes: changes are written by {@link #flush()} on {@code writer}, which must run the
+     * tasks one after another in the order given (a single thread).
+     */
+    LockStore deferWrites(Executor writer) { this.writer = writer; return this; }
+
+    /** Whether there are changes that no write has picked up yet. */
+    boolean pending() { return dirty.get(); }
+
+    private void changed() throws IOException {
+        if (writer == null) write(snapshot());
+        else dirty.set(true);
+    }
+
+    private Snapshot snapshot() {
+        Map<UUID, List<UUID>> b = new LinkedHashMap<>();
+        buddies.forEach((owner, set) -> b.put(owner, List.copyOf(set)));
+        return new Snapshot(new HashMap<>(locks), b);
+    }
+
+    /** Server thread, called every few seconds: hands the changes since the last call to the writer. */
+    void flush() {
+        Executor current = writer;
+        if (current == null || !dirty.getAndSet(false)) return;
+        Snapshot snapshot = snapshot();
+        try { current.execute(() -> writeLogged(snapshot)); }
+        catch (java.util.concurrent.RejectedExecutionException stopped) { writeLogged(snapshot); }
+    }
+
+    /**
+     * Server thread, at plugin stop: waits for the writer (up to 30 seconds), then writes the changes that are left on
+     * this thread. Later changes are written at once.
+     */
+    void close() {
+        Executor current = writer;
+        writer = null;
+        if (current instanceof java.util.concurrent.ExecutorService service) {
+            service.shutdown();
+            try {
+                if (!service.awaitTermination(30, java.util.concurrent.TimeUnit.SECONDS) && logger != null)
+                    logger.warning("Saving locks.yml took longer than 30 seconds; writing the current locks now.");
+            } catch (InterruptedException interrupted) { Thread.currentThread().interrupt(); }
+        }
+        if (dirty.getAndSet(false)) writeLogged(snapshot());
+    }
+
+    private void writeLogged(Snapshot snapshot) {
+        try { write(snapshot); }
+        catch (IOException | RuntimeException failure) {
+            dirty.set(true);
+            if (logger != null) logger.warning("Cannot save locks.yml: " + failure.getMessage() + ". The locks stay in memory; the next save tries again.");
+        }
+    }
+
+    private void write(Snapshot snapshot) throws IOException {
         YamlConfiguration yaml = new YamlConfiguration();
-        locks.forEach((key, lock) -> {
+        snapshot.locks().forEach((key, lock) -> {
             String path = "locks." + key.replace(':', '|');
             yaml.set(path + ".owner", lock.owner().toString());
             if (lock.hasPassword()) { yaml.set(path + ".salt", lock.salt()); yaml.set(path + ".hash", lock.hash()); }
         });
-        buddies.forEach((owner, set) -> yaml.set("buddies." + owner, set.stream().map(UUID::toString).toList()));
-        Files.createDirectories(file.getParent());
-        if (problem != null && Files.exists(file)) YamlCheck.backup(file.toFile(), logger);
-        problem = null;
-        files.write(file, yaml);
+        snapshot.buddies().forEach((owner, list) -> yaml.set("buddies." + owner, list.stream().map(UUID::toString).toList()));
+        synchronized (writing) {
+            Files.createDirectories(file.getParent());
+            if (problem != null && Files.exists(file)) YamlCheck.backup(file.toFile(), logger);
+            problem = null;
+            files.write(file, yaml);
+        }
     }
 }

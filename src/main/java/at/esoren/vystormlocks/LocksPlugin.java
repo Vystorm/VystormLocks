@@ -56,6 +56,13 @@ public final class LocksPlugin extends JavaPlugin implements Listener {
 
     /** Minimum Vystorm Core: placeholders through api.placeholders(). */
     static final String MIN_CORE = "0.65.0";
+    /** How often changed locks are written to locks.yml (100 ticks = 5 seconds; 1.3.2). */
+    static final long SAVE_TICKS = 100;
+
+    @Override
+    public void onDisable() {
+        if (store != null) store.close(); // a clean stop writes every change
+    }
 
     /** Whether a feature (and locks.enabled) is on; static so tests with a mocked plugin read the real field. */
     static boolean enabled(LocksPlugin plugin, Feature feature) {
@@ -92,7 +99,14 @@ public final class LocksPlugin extends JavaPlugin implements Listener {
         // tutorial.enabled is read once: Core lists tutorials when a plugin starts
         if (on(Feature.TUTORIAL)) try { core.registerTutorial(this); } catch (RuntimeException noTutorial) { getLogger().fine("Tutorial not registered: " + noTutorial); }
         core.admin().updates().spigot(this, 140627);
-        store = new LockStore(getDataFolder().toPath().resolve("locks.yml"), core.data().files(), getLogger());
+        store = new LockStore(getDataFolder().toPath().resolve("locks.yml"), core.data().files(), getLogger())
+                .deferWrites(java.util.concurrent.Executors.newSingleThreadExecutor(task -> {
+                    Thread thread = new Thread(task, "VystormLocks locks.yml");
+                    thread.setDaemon(true);
+                    return thread;
+                }));
+        // changes are written together at most every SAVE_TICKS, off the server thread; onDisable writes the rest
+        core.tasks().of(this, "locks-save").timer(SAVE_TICKS, SAVE_TICKS, store::flush);
         getServer().getPluginManager().registerEvents(this, this);
         handleBlockEvents(core.priority().stages());
         handleProtectionEvents(core.priority().stages());
