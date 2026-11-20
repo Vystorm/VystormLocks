@@ -77,7 +77,7 @@ commands:
         name: list
         aliases: []
         description: "Tes amis de coffre"
-feature-needs: "<red>Il faut pour cela l'interrupteur {switch}, désactivé sur ce serveur."
+feature-needs: "<red>Cela nécessite « {name} » ({switch}), qui est désactivé sur ce serveur."
 switches:
   locks: "Tout le plugin : protection des conteneurs"
   auto-protect: "Protéger les conteneurs à la pose"
@@ -94,3 +94,15 @@ placeholder:
   buddies_count: "Amis de coffre du joueur"
   locks_count: "Conteneurs protégés par le joueur"
   locks_total: "Blocs protégés sur le serveur"
+switch-names:
+  locks: "Protection des conteneurs"
+  auto-protect: "Protection automatique"
+  manual: "Contrôle manuel"
+  buddies: "Amis de coffre"
+  passwords: "Mots de passe"
+  hoppers: "Protection contre les entonnoirs"
+  explosions: "Protection contre les explosions"
+  pistons: "Protection contre les pistons"
+  withers: "Protection contre les withers et les monstres"
+  fire: "Protection contre le feu"
+  tutorial: "Tutoriel"

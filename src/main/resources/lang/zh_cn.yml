@@ -77,7 +77,7 @@ commands:
         name: list
         aliases: []
         description: "你的箱子好友"
-feature-needs: "<red>这需要开关 {switch}，它在本服务器上已关闭。"
+feature-needs: "<red>这需要 “{name}”（{switch}），但它已在本服务器上关闭。"
 switches:
   locks: "整个插件：容器保护"
   auto-protect: "放置时自动保护容器"
@@ -94,3 +94,15 @@ placeholder:
   buddies_count: "玩家的箱子好友数"
   locks_count: "玩家保护的容器数"
   locks_total: "服务器上受保护的方块数"
+switch-names:
+  locks: "容器保护"
+  auto-protect: "自动保护"
+  manual: "手动控制"
+  buddies: "箱子好友"
+  passwords: "密码"
+  hoppers: "漏斗保护"
+  explosions: "爆炸保护"
+  pistons: "活塞保护"
+  withers: "凋灵和怪物保护"
+  fire: "防火保护"
+  tutorial: "教程"

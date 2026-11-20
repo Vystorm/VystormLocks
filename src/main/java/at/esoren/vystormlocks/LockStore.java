@@ -48,10 +48,23 @@ final class LockStore {
     private final Map<UUID, Set<UUID>> buddies = new HashMap<>();
 
     /** @param files Core's file part, {@code api.data().files()} */
-    LockStore(Path file, AtomicFilesInterface files) {
+    LockStore(Path file, AtomicFilesInterface files) { this(file, files, null); }
+
+    private final java.util.logging.Logger logger;
+    /** The YAML error the file had when it was read; the file is copied aside before the first write (1.3.1). */
+    private String problem;
+
+    LockStore(Path file, AtomicFilesInterface files, java.util.logging.Logger logger) {
         this.file = file;
         this.files = files;
+        this.logger = logger;
         if (!Files.isRegularFile(file)) return;
+        problem = YamlCheck.problem(file.toFile());
+        if (problem != null) {
+            if (logger != null) logger.severe(file.getFileName() + " has a YAML error at " + problem + "; no locks or buddies are loaded,"
+                    + " so the blocks in it are unprotected until it is fixed and the server restarts. The file stays as it is until a lock changes, then it is copied aside first.");
+            return;
+        }
         YamlConfiguration yaml = YamlConfiguration.loadConfiguration(file.toFile());
         ConfigurationSection l = yaml.getConfigurationSection("locks");
         if (l != null) for (String key : l.getKeys(false)) {
@@ -104,6 +117,8 @@ final class LockStore {
         });
         buddies.forEach((owner, set) -> yaml.set("buddies." + owner, set.stream().map(UUID::toString).toList()));
         Files.createDirectories(file.getParent());
+        if (problem != null && Files.exists(file)) YamlCheck.backup(file.toFile(), logger);
+        problem = null;
         files.write(file, yaml);
     }
 }

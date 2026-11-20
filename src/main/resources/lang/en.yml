@@ -77,7 +77,7 @@ commands:
         name: list
         aliases: []
         description: "Your chest buddies"
-feature-needs: "<red>This needs the switch {switch}, which is off on this server."
+feature-needs: "<red>This needs “{name}” ({switch}), which is switched off on this server."
 switches:
   locks: "The whole plugin: container protection"
   auto-protect: "Protect containers when they are placed"
@@ -94,3 +94,15 @@ placeholder:
   buddies_count: "Chest buddies of the player"
   locks_count: "Containers the player protected"
   locks_total: "Protected blocks on the server"
+switch-names:
+  locks: "Container protection"
+  auto-protect: "Automatic protection"
+  manual: "Manual control"
+  buddies: "Chest buddies"
+  passwords: "Passwords"
+  hoppers: "Hopper protection"
+  explosions: "Explosion protection"
+  pistons: "Piston protection"
+  withers: "Wither and mob protection"
+  fire: "Fire protection"
+  tutorial: "Tutorial"

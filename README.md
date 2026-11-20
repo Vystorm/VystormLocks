@@ -1,6 +1,6 @@
 # Vystorm Locks
 
-Free container protection for Paper 1.20.6–26.x, Java 21 or newer (the build compiles it against the Paper 1.20.6 API; no live Spigot start is recorded for this plugin). It needs [Vystorm Core](https://vystorm.net) 0.65.0 or newer (free).
+Free container protection for Paper 1.20.6–26.x, Java 21 or newer (the build compiles it against the Paper 1.20.6 API). Tested on Paper and Purpur 26.2, Paper 1.20.6 and Spigot 26.2. It needs [Vystorm Core](https://vystorm.net) 0.65.0 or newer (free).
 
 - **Automatic protection:** chests, barrels, shulker boxes, furnaces, hoppers, dispensers, droppers and brewing stands you place are protected right away. Double chests share the protection.
 - **Chest buddies:** `/chestbuddy add NAME`, `remove NAME` and `list` manage friends who may open all your protected containers.

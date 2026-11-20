@@ -66,7 +66,7 @@ class SwitchesTest {
         for (String code : LANGUAGES) {
             YamlConfiguration lang = YamlConfiguration.loadConfiguration(new File("src/main/resources/lang/" + code + ".yml"));
             assertFalse(lang.getString("feature-off", "").isBlank(), code);
-            assertTrue(lang.getString("feature-needs", "").contains("{switch}"), code);
+            assertTrue(lang.getString("feature-needs", "").matches(".*\\{name}.*\\{switch}.*"), code);
             for (Feature feature : Feature.values()) assertFalse(lang.getString(feature.description(), "").isBlank(), code + " " + feature.description());
             for (String key : PLACEHOLDERS) assertFalse(lang.getString("placeholder." + key, "").isBlank(), code + " placeholder." + key);
         }
@@ -146,8 +146,9 @@ class SwitchesTest {
         noBuddies.buddyList(player);
         verify(langOf(noBuddies)).send(player, "feature-off");
         LocksPlugin master = plugin(chest, Feature.LOCKS);
+        when(langOf(master).plain(player, Feature.LOCKS.label())).thenReturn("Container locks");
         master.password(player, "secret");
-        verify(langOf(master)).send(player, "feature-needs", "switch", "locks.enabled");
+        verify(langOf(master)).send(player, "feature-needs", "switch", "locks.enabled", "name", "Container locks");
     }
 
     @Test void givenASwitchOff_whenTheCommandTreesAreAsked_thenItsCommandsAreHiddenAndReturnWhenItIsOnAgain() throws Exception {
@@ -179,6 +180,7 @@ class SwitchesTest {
         config.set(Feature.BUDDIES.path, false);
         doReturn(config).when(plugin).getConfig();
         doNothing().when(plugin).reloadConfig();
+        doReturn(true).when(plugin).readConfig(); // config.yml parsed
         for (var entry : Map.of("core", core, "commandSwitches", Feature.Switches.without()).entrySet()) {
             Field field = LocksPlugin.class.getDeclaredField(entry.getKey());
             field.setAccessible(true);

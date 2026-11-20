@@ -77,7 +77,7 @@ commands:
         name: list
         aliases: []
         description: "I tuoi amici di forziere"
-feature-needs: "<red>Serve l'interruttore {switch}, che su questo server è spento."
+feature-needs: "<red>Questo richiede «{name}» ({switch}), che è disattivato su questo server."
 switches:
   locks: "Tutto il plugin: protezione dei contenitori"
   auto-protect: "Proteggere i contenitori quando vengono piazzati"
@@ -94,3 +94,15 @@ placeholder:
   buddies_count: "Amici della cassa del giocatore"
   locks_count: "Contenitori protetti dal giocatore"
   locks_total: "Blocchi protetti sul server"
+switch-names:
+  locks: "Protezione dei contenitori"
+  auto-protect: "Protezione automatica"
+  manual: "Controllo manuale"
+  buddies: "Amici della cassa"
+  passwords: "Password"
+  hoppers: "Protezione dalle tramogge"
+  explosions: "Protezione dalle esplosioni"
+  pistons: "Protezione dai pistoni"
+  withers: "Protezione da wither e mostri"
+  fire: "Protezione dal fuoco"
+  tutorial: "Tutorial"

@@ -77,7 +77,7 @@ commands:
         name: list
         aliases: []
         description: "Seus amigos de baú"
-feature-needs: "<red>Isto precisa do interruptor {switch}, que está desligado neste servidor."
+feature-needs: "<red>Isto precisa de “{name}” ({switch}), que está desligado neste servidor."
 switches:
   locks: "O plugin inteiro: proteção de contêineres"
   auto-protect: "Proteger contêineres ao colocá-los"
@@ -94,3 +94,15 @@ placeholder:
   buddies_count: "Amigos de baú do jogador"
   locks_count: "Contêineres que o jogador protegeu"
   locks_total: "Blocos protegidos no servidor"
+switch-names:
+  locks: "Proteção de contêineres"
+  auto-protect: "Proteção automática"
+  manual: "Controle manual"
+  buddies: "Amigos de baú"
+  passwords: "Senhas"
+  hoppers: "Proteção contra funis"
+  explosions: "Proteção contra explosões"
+  pistons: "Proteção contra pistões"
+  withers: "Proteção contra withers e monstros"
+  fire: "Proteção contra fogo"
+  tutorial: "Tutorial"

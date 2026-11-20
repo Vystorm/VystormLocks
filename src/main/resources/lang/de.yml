@@ -77,7 +77,7 @@ commands:
         name: list
         aliases: []
         description: "Deine Kisten-Buddies"
-feature-needs: "<red>Dafür braucht es den Schalter {switch}, der auf diesem Server aus ist."
+feature-needs: "<red>Dafür braucht es „{name}“ ({switch}), das auf diesem Server ausgeschaltet ist."
 switches:
   locks: "Das ganze Plugin: Schutz von Behältern"
   auto-protect: "Behälter beim Setzen schützen"
@@ -94,3 +94,15 @@ placeholder:
   buddies_count: "Kistenfreunde des Spielers"
   locks_count: "Behälter, die der Spieler geschützt hat"
   locks_total: "Geschützte Blöcke auf dem Server"
+switch-names:
+  locks: "Behälterschutz"
+  auto-protect: "Automatischer Schutz"
+  manual: "Schutz von Hand"
+  buddies: "Kistenfreunde"
+  passwords: "Passwörter"
+  hoppers: "Trichterschutz"
+  explosions: "Explosionsschutz"
+  pistons: "Kolbenschutz"
+  withers: "Schutz vor Withern und Monstern"
+  fire: "Feuerschutz"
+  tutorial: "Tutorial"

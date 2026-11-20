@@ -77,7 +77,7 @@ commands:
         name: list
         aliases: []
         description: "Твои друзья по сундукам"
-feature-needs: "<red>Для этого нужен переключатель {switch}, а он на этом сервере выключен."
+feature-needs: "<red>Для этого нужна функция «{name}» ({switch}), а она отключена на этом сервере."
 switches:
   locks: "Весь плагин: защита контейнеров"
   auto-protect: "Защищать контейнеры при установке"
@@ -94,3 +94,15 @@ placeholder:
   buddies_count: "Друзья сундука игрока"
   locks_count: "Контейнеры, защищённые игроком"
   locks_total: "Защищённые блоки на сервере"
+switch-names:
+  locks: "Защита контейнеров"
+  auto-protect: "Автоматическая защита"
+  manual: "Ручное управление"
+  buddies: "Друзья сундука"
+  passwords: "Пароли"
+  hoppers: "Защита от воронок"
+  explosions: "Защита от взрывов"
+  pistons: "Защита от поршней"
+  withers: "Защита от визеров и мобов"
+  fire: "Защита от огня"
+  tutorial: "Обучение"

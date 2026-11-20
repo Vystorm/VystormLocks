@@ -1,3 +1,11 @@
+## 1.3.1 — 2026-11-20
+
+- A damaged `locks.yml` no longer loses the locks: a file with a YAML syntax error is no longer replaced by a nearly empty file. The console names the line and column of the error; the file stays as it is until a lock or buddy changes, and is then first copied to `locks.yml.broken-<date>` (named in the console), so the saved locks can be recovered. While the file is broken its locks are not loaded, so fix it and restart.
+- Reloading `config.yml` through `/vadmin` with a YAML syntax error keeps the last working settings instead of falling back to the defaults; the console names the line and column. The file is never changed.
+- `/vadmin features` shows every switch of the plugin with a readable name in the admin's language, for example "Automatic protection" and "Wither and mob protection", instead of a name built from the config key such as "Auto protect". The names exist in all seven languages.
+- A command that needs `locks.enabled` now names the switch in full: "This needs “Container protection” (locks.enabled), which is switched off on this server."
+- README: names the platforms the plugin was tested on (Paper and Purpur 26.2, Paper 1.20.6, Spigot 26.2) instead of saying that no Spigot start was recorded.
+
 ## 1.3.0 — 2026-11-18
 
 - Requires Vystorm Core 0.65.0 or newer. Update Core before you update this plugin.

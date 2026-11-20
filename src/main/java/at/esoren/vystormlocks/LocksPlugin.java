@@ -72,7 +72,7 @@ public final class LocksPlugin extends JavaPlugin implements Listener {
     boolean off(CommandSender sender, Feature feature) {
         if (on(feature)) return false;
         Feature.Switches current = switches;
-        if (feature != Feature.LOCKS && current != null && !current.off().contains(feature)) lang.send(sender, "feature-needs", "switch", Feature.LOCKS.path);
+        if (feature != Feature.LOCKS && current != null && !current.off().contains(feature)) lang.send(sender, "feature-needs", "switch", Feature.LOCKS.path, "name", lang.plain(sender, Feature.LOCKS.label()));
         else lang.send(sender, "feature-off");
         return true;
     }
@@ -92,7 +92,7 @@ public final class LocksPlugin extends JavaPlugin implements Listener {
         // tutorial.enabled is read once: Core lists tutorials when a plugin starts
         if (on(Feature.TUTORIAL)) try { core.registerTutorial(this); } catch (RuntimeException noTutorial) { getLogger().fine("Tutorial not registered: " + noTutorial); }
         core.admin().updates().spigot(this, 140627);
-        store = new LockStore(getDataFolder().toPath().resolve("locks.yml"), core.data().files());
+        store = new LockStore(getDataFolder().toPath().resolve("locks.yml"), core.data().files(), getLogger());
         getServer().getPluginManager().registerEvents(this, this);
         handleBlockEvents(core.priority().stages());
         handleProtectionEvents(core.priority().stages());
@@ -208,9 +208,31 @@ public final class LocksPlugin extends JavaPlugin implements Listener {
                 || (passwords() && unlocked.getOrDefault(id, Set.of()).contains(key));
     }
 
+    /** The YAML error of config.yml found by the last load ("line L, column C: ..."), null when it parsed. */
+    private String configProblem;
+    private boolean configLoaded;
+
+    String configProblem() { return configProblem; }
+
+    /**
+     * Reads config.yml for start and reload. A file with a YAML error is left byte-identical and the error logged once;
+     * false is returned so that a reload keeps the last good settings (Bukkit would hand back the jar defaults).
+     */
+    boolean readConfig() {
+        configProblem = YamlCheck.problem(new java.io.File(getDataFolder(), "config.yml"));
+        if (configProblem != null) {
+            getLogger().severe("config.yml has a YAML error at " + configProblem + ". The file was left unchanged; "
+                    + (configLoaded ? "the last working settings stay in use." : "the default settings are used.") + " Fix it and reload it with /vadmin.");
+            return false;
+        }
+        reloadConfig();
+        return true;
+    }
+
     /** Reads the values kept in fields; also the reload hook of Core's config editor and feature switches. */
     void loadSettings() {
-        reloadConfig();
+        if (!readConfig() && configLoaded) return; // a broken config.yml on reload: keep the last good settings
+        configLoaded = true;
         patterns = Patterns.of(getConfig().getStringList("protect").stream().map(s -> s.toUpperCase(Locale.ROOT)).toList());
         switches = Feature.Switches.read(getConfig());
         // help and tab completion ask the switches at every completion; when one changed, online players get their
@@ -226,11 +248,16 @@ public final class LocksPlugin extends JavaPlugin implements Listener {
         try {
             var config = core.settings().config();
             config.register(this, "config.yml", this::loadSettings);
-            for (Feature feature : Feature.values()) {
-                config.feature(this, feature.path, null, lang.ref(feature.description()));
-                if (feature.needsRestart()) config.activation(this, feature.path, Vystorm.vystorm_core._uiMethods.settings.SettingPolicy.Activation.RESTART);
-            }
+            declareSwitches(config, this, lang);
         } catch (RuntimeException failure) { getLogger().fine("Config editor not registered: " + failure); }
+    }
+
+    /** Every switch in /vadmin features with its readable name and one-line description in the admin's language. */
+    static void declareSwitches(Vystorm.vystorm_core._uiMethods.settings.ConfigEditorInterface config, org.bukkit.plugin.Plugin plugin, Lang lang) {
+        for (Feature feature : Feature.values()) {
+            config.feature(plugin, feature.path, lang.ref(feature.label()), lang.ref(feature.description()));
+            if (feature.needsRestart()) config.activation(plugin, feature.path, Vystorm.vystorm_core._uiMethods.settings.SettingPolicy.Activation.RESTART);
+        }
     }
 
     /** Feature switches (1.1.0): off = buddies and passwords give no access and their commands say so; saved data stays. */
