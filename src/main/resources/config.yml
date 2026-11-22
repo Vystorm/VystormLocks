@@ -67,6 +67,12 @@ manual-locks:
 # Maximum chest buddies per player.
 max-buddies: 32
 
+# Ranking for Vystorm Boards and placeholders: locks:containers, the players with the most protected containers
+# (offline players included, no locations). Needs Vystorm Core 0.67.0 or newer; with an older Core nothing is offered
+# and the rest of the plugin works as before. Off: the ranking is not offered.
+rankings:
+  enabled: true
+
 # Tutorial in the Vystorm Core main menu (/vmenu -> Tutorials). Needs a server restart to apply.
 tutorial:
   enabled: true

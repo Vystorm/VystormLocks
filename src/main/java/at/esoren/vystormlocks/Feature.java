@@ -28,6 +28,8 @@ enum Feature {
     PISTONS("piston-protection.enabled"),
     WITHERS("wither-protection.enabled"),
     FIRE("fire-protection.enabled"),
+    /** The ranking locks:containers in Core's placeholders (1.4.0; needs Core 0.67.0, otherwise nothing is offered). */
+    RANKINGS("rankings.enabled"),
     /** Read once when the plugin starts. */
     TUTORIAL("tutorial.enabled");
 

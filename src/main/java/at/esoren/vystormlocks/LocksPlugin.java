@@ -112,6 +112,9 @@ public final class LocksPlugin extends JavaPlugin implements Listener {
         handleProtectionEvents(core.priority().stages());
         try { registerPlaceholders(core.placeholders()); }
         catch (RuntimeException failure) { getLogger().log(java.util.logging.Level.WARNING, "Placeholders not registered", failure); }
+        // names of the owners for the ranking, looked up once here so the ranking itself never reads a player file
+        for (UUID owner : store.owners().keySet()) ownerNames.put(owner, name(owner));
+        applyRankings();
         registerCommands();
         getLogger().info(store.size() + " protected blocks loaded.");
     }
@@ -249,6 +252,7 @@ public final class LocksPlugin extends JavaPlugin implements Listener {
         configLoaded = true;
         patterns = Patterns.of(getConfig().getStringList("protect").stream().map(s -> s.toUpperCase(Locale.ROOT)).toList());
         switches = Feature.Switches.read(getConfig());
+        applyRankings();   // rankings.enabled (and locks.enabled) apply without a restart
         // help and tab completion ask the switches at every completion; when one changed, online players get their
         // command list again (the commands are not registered again)
         if (commandSwitches != null && !commandSwitches.equals(switches)) {
@@ -281,6 +285,52 @@ public final class LocksPlugin extends JavaPlugin implements Listener {
     String name(UUID id) {
         OfflinePlayer p = Bukkit.getOfflinePlayer(id);
         return p.getName() == null ? id.toString().substring(0, 8) : p.getName();
+    }
+
+    // ---- ranking locks:containers (1.4.0, Core 0.67.0) -----------------------------------------------------------------
+
+    /** Last known names of lock owners: filled once at the start, then from online players. */
+    private final Map<UUID, String> ownerNames = new java.util.concurrent.ConcurrentHashMap<>();
+    private boolean rankingsRefused;
+
+    /** The name shown in the ranking: an online player's current name, else the remembered one; never reads a player file. */
+    String rankingName(UUID id) {
+        Player online = Bukkit.getPlayer(id);
+        if (online != null) { ownerNames.put(id, online.getName()); return online.getName(); }
+        return ownerNames.getOrDefault(id, id.toString().substring(0, 8));
+    }
+
+    /** Offers or removes locks:containers after the switches were read; nothing at all on a Core older than 0.67.0. */
+    void applyRankings() {
+        if (core == null || store == null) return;   // the first loadSettings runs before the store exists
+        applyRankings(CoreApi.has("placeholder-rankings"));
+    }
+
+    void applyRankings(boolean coreHasRankings) {
+        Throwable refused = rankings(coreHasRankings, this, core::placeholders, on(Feature.RANKINGS), () -> store, this::rankingName,
+                key -> lang == null ? key : lang.ref(key));
+        if (refused != null && !rankingsRefused) {
+            rankingsRefused = true;
+            java.util.logging.Logger log = getLogger();
+            if (log != null) log.warning("Rankings not offered: " + refused);
+        }
+    }
+
+    /**
+     * Declares (or removes) the ranking when Core has rankings. The class naming Core's ranking types is only loaded
+     * inside this check. Returns the refusal (logged by the caller once), null when it worked or there was nothing to do.
+     */
+    static Throwable rankings(boolean coreHasRankings, org.bukkit.plugin.Plugin plugin,
+                              java.util.function.Supplier<Vystorm.vystorm_core._advancedMethods.placeholderHandler.PlaceholderInterface> registry,
+                              boolean on, java.util.function.Supplier<LockStore> store, java.util.function.Function<UUID, String> names,
+                              java.util.function.UnaryOperator<String> ref) {
+        if (!coreHasRankings) return null;
+        try {
+            LocksRankings.apply(plugin, registry.get(), on, store, names, ref);
+            return null;
+        } catch (RuntimeException | LinkageError refused) {
+            return refused;
+        }
     }
 
     private void fail(CommandSender sender, IOException failure) {
@@ -413,7 +463,12 @@ public final class LocksPlugin extends JavaPlugin implements Listener {
     }
 
     @EventHandler
-    public void quit(PlayerQuitEvent event) { unlocked.remove(event.getPlayer().getUniqueId()); }
+    public void quit(PlayerQuitEvent event) {
+        Player player = event.getPlayer();
+        unlocked.remove(player.getUniqueId());
+        // the ranking keeps showing an owner who leaves under the name they had (memory only, nothing is saved)
+        if (store != null && store.owners().containsKey(player.getUniqueId())) ownerNames.put(player.getUniqueId(), player.getName());
+    }
 
     // ---- commands -------------------------------------------------------------------------------------------------
 

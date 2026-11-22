@@ -89,6 +89,7 @@ switches:
   pistons: "Kolben bewegen geschützte Behälter nicht"
   withers: "Wither und Mobs zerstören geschützte Behälter nicht"
   fire: "Feuer verbrennt geschützte Behälter nicht"
+  rankings: "Rangliste locks:containers für Tafeln und Platzhalter (braucht Vystorm Core 0.67.0)"
   tutorial: "Tutorial im Hauptmenü (braucht einen Neustart)"
 placeholder:
   buddies_count: "Kistenfreunde des Spielers"
@@ -105,4 +106,9 @@ switch-names:
   pistons: "Kolbenschutz"
   withers: "Schutz vor Withern und Monstern"
   fire: "Feuerschutz"
+  rankings: "Ranglisten"
   tutorial: "Tutorial"
+rankings:
+  containers:
+    label: "Geschützte Behälter"
+    description: "Behälter, die ein Spieler geschützt hat"

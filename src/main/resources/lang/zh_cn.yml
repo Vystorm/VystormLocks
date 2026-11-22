@@ -89,6 +89,7 @@ switches:
   pistons: "活塞不能移动受保护的容器"
   withers: "凋灵和生物不能破坏受保护的容器"
   fire: "火不会烧毁受保护的容器"
+  rankings: "用于看板和占位符的排行榜 locks:containers（需要 Vystorm Core 0.67.0）"
   tutorial: "主菜单中的教程（需要重启）"
 placeholder:
   buddies_count: "玩家的箱子好友数"
@@ -105,4 +106,9 @@ switch-names:
   pistons: "活塞保护"
   withers: "凋灵和怪物保护"
   fire: "防火保护"
+  rankings: "排行榜"
   tutorial: "教程"
+rankings:
+  containers:
+    label: "受保护的容器"
+    description: "玩家保护的容器数量"

@@ -89,6 +89,7 @@ switches:
   pistons: "Pistões não movem contêineres protegidos"
   withers: "Withers e criaturas não quebram contêineres protegidos"
   fire: "O fogo não queima contêineres protegidos"
+  rankings: "Ranking locks:containers para quadros e placeholders (requer Vystorm Core 0.67.0)"
   tutorial: "Tutorial no menu principal (precisa reiniciar)"
 placeholder:
   buddies_count: "Amigos de baú do jogador"
@@ -105,4 +106,9 @@ switch-names:
   pistons: "Proteção contra pistões"
   withers: "Proteção contra withers e monstros"
   fire: "Proteção contra fogo"
+  rankings: "Rankings"
   tutorial: "Tutorial"
+rankings:
+  containers:
+    label: "Contêineres protegidos"
+    description: "Contêineres que um jogador protegeu"

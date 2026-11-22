@@ -89,6 +89,7 @@ switches:
   pistons: "Les pistons ne déplacent pas les conteneurs protégés"
   withers: "Withers et monstres ne cassent pas les conteneurs protégés"
   fire: "Le feu ne brûle pas les conteneurs protégés"
+  rankings: "Classement locks:containers pour les tableaux et les placeholders (nécessite Vystorm Core 0.67.0)"
   tutorial: "Tutoriel dans le menu principal (redémarrage nécessaire)"
 placeholder:
   buddies_count: "Amis de coffre du joueur"
@@ -105,4 +106,9 @@ switch-names:
   pistons: "Protection contre les pistons"
   withers: "Protection contre les withers et les monstres"
   fire: "Protection contre le feu"
+  rankings: "Classements"
   tutorial: "Tutoriel"
+rankings:
+  containers:
+    label: "Conteneurs protégés"
+    description: "Conteneurs qu'un joueur a protégés"

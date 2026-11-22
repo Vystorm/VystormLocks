@@ -20,10 +20,30 @@ Every feature has an on/off switch, all on by default, listed in Core's `/vadmin
 - `auto-protect`, `manual-locks.enabled` (`/vlock`, `/vlock on`, `/vlock off`), `chest-buddies`, `passwords`.
 - `hopper-protection`, `explosion-protection`, `piston-protection.enabled`, `wither-protection.enabled`, `fire-protection.enabled`.
 - `tutorial.enabled`.
+- `rankings.enabled`: the ranking `locks:containers` (needs Vystorm Core 0.67.0 or newer).
 
 ## Placeholders
 
 Namespace `locks`, listed by `/vadmin placeholders locks`: `%vystorm_locks_locks_count%` (containers the player protected), `%vystorm_locks_buddies_count%` and `%vystorm_locks_locks_total%`. Short form in Vystorm texts: `{locks:locks_count}`.
+
+## Rankings (1.4.0)
+
+With Vystorm Core 0.67.0 or newer the plugin offers one ranking: `locks:containers`, protected containers per player (offline players included, no locations). Vystorm Boards 1.21.0 or newer shows it on a board; put a text element above it as heading:
+
+```yaml
+elements:
+  - {type: text, text: "<gold>Most protected containers", x: 16, y: 12, size: 22}
+  - {type: top, source: "locks:containers", x: 16, y: 48, width: 480, rows: 10, highlight: true}
+```
+
+| Placeholder | Value |
+| --- | --- |
+| `%vystorm_locks_top_containers_<n>_name%` | Name on place n (1 to 100), empty if nobody holds it |
+| `%vystorm_locks_top_containers_<n>_value%` | Containers on place n, formatted in the viewer's language (`_raw` for the plain number) |
+| `%vystorm_locks_rank_containers%` | The viewer's place, `-` if none |
+| `%vystorm_locks_value_containers%` | The viewer's containers, `-` if none |
+
+Short form in Vystorm texts: `{locks:top_containers:1:name}`, `{locks:rank_containers}`. `/vadmin placeholders rankings` lists the ranking. Switch: `rankings.enabled`. With an older Core the plugin offers no ranking and works as before.
 
 ## Build
 `./gradlew build -PvystormCoreJar=/path/to/Vystorm_Core.jar`

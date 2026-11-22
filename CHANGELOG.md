@@ -1,3 +1,10 @@
+## 1.4.0 — 2026-11-22
+
+- New ranking `locks:containers`: the players with the most protected containers. Vystorm Boards shows it on a board with `{type: top, source: "locks:containers", rows: 10}`, and the same values are placeholders, for example `%vystorm_locks_top_containers_1_name%` and `%vystorm_locks_rank_containers%`. It counts the locks that `locks.yml` already holds, so players who are offline are listed from the first start. It shows names and counts only, never where a container stands.
+- The ranking needs Vystorm Core 0.67.0 or newer, and Vystorm Boards 1.21.0 or newer to show it on a board. The plugin itself still runs with Vystorm Core 0.65.0 or newer; with an older Core it offers no ranking and everything else works as before.
+- New switch `rankings.enabled`, on by default and listed in `/vadmin features` as "Rankings" in seven languages. Off, or with `locks.enabled` off, the ranking is not offered; the change applies at once without a restart.
+- The file format of `locks.yml` is unchanged.
+
 ## 1.3.2 — 2026-11-20
 
 - Placing or breaking a container no longer writes the whole `locks.yml` again on the server thread. Changes are collected and written together at most every 5 seconds by a background thread, so large storage rooms and hopper sorters no longer cost a short stall with every block placed.

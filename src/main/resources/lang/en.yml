@@ -89,6 +89,7 @@ switches:
   pistons: "Pistons cannot move protected containers"
   withers: "Withers and mobs cannot break protected containers"
   fire: "Fire does not burn protected containers"
+  rankings: "Ranking locks:containers for boards and placeholders (needs Vystorm Core 0.67.0)"
   tutorial: "Tutorial in the main menu (needs a restart)"
 placeholder:
   buddies_count: "Chest buddies of the player"
@@ -105,4 +106,9 @@ switch-names:
   pistons: "Piston protection"
   withers: "Wither and mob protection"
   fire: "Fire protection"
+  rankings: "Rankings"
   tutorial: "Tutorial"
+rankings:
+  containers:
+    label: "Protected containers"
+    description: "Containers a player protected"

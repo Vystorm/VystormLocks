@@ -89,9 +89,23 @@ final class LockStore {
     /** Containers one player protected (placeholders; walks every lock, so callers cache it). */
     int count(UUID owner) { int n = 0; for (Lock lock : locks.values()) if (lock.owner().equals(owner)) n++; return n; }
 
-    void put(String key, Lock lock) throws IOException { locks.put(key, lock); changed(); }
+    /** Protected blocks per owner (the ranking {@code locks:containers}); counted again only after a lock changed. */
+    private Map<UUID, Integer> owners;
+
+    Map<UUID, Integer> owners() {
+        Map<UUID, Integer> current = owners;
+        if (current == null) {
+            Map<UUID, Integer> counted = new HashMap<>();
+            for (Lock lock : locks.values()) counted.merge(lock.owner(), 1, Integer::sum);
+            owners = current = Collections.unmodifiableMap(counted);
+        }
+        return current;
+    }
+
+    void put(String key, Lock lock) throws IOException { locks.put(key, lock); owners = null; changed(); }
     boolean remove(String key) throws IOException {
         if (locks.remove(key) == null) return false;
+        owners = null;
         changed(); return true;
     }
 
