@@ -1,3 +1,11 @@
+## 1.5.0 — 2026-11-27
+
+- New menu: plain `/vlock` (or `/lock`) now opens it, and it is listed in Core's main menu `/vmenu`. It shows the container you look at (owner, whether it has a password) with buttons to protect it, remove the protection, set or remove a password, or enter the password of someone else's container, and your chest buddies with a remove button each and "Add buddy". Nobody has to type `/chestbuddy add NAME` or `/vlock password WORD` any more; the buttons run the same code, with the same limits and messages.
+- "Add buddy" opens Vystorm Core's player picker (online, nearby, recent and search) on Core 0.71.0 or newer. With an older Core it asks for the name in a text window. The menu works as a Vystorm Screen and as a chest menu (Spigot, Paper 1.20.6, screens off); in the chest a buddy is removed with a second click.
+- Core's player menu (sneak and right-click a player) has a new entry to add that player as chest buddy or remove them again.
+- The info line that plain `/vlock` showed before is now `/vlock info` (it was already there). Where no menu can open, plain `/vlock` still shows the info line. All commands stay as they were.
+- Still runs with Vystorm Core 0.65.0 or newer. `locks.yml` and `config.yml` are unchanged.
+
 ## 1.4.0 — 2026-11-22
 
 - New ranking `locks:containers`: the players with the most protected containers. Vystorm Boards shows it on a board with `{type: top, source: "locks:containers", rows: 10}`, and the same values are placeholders, for example `%vystorm_locks_top_containers_1_name%` and `%vystorm_locks_rank_containers%`. It counts the locks that `locks.yml` already holds, so players who are offline are listed from the first start. It shows names and counts only, never where a container stands.

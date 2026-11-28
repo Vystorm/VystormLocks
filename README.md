@@ -5,7 +5,8 @@ Free container protection for Paper 1.20.6–26.x, Java 21 or newer (the build c
 - **Automatic protection:** chests, barrels, shulker boxes, furnaces, hoppers, dispensers, droppers and brewing stands you place are protected right away. Double chests share the protection.
 - **Chest buddies:** `/chestbuddy add NAME`, `remove NAME` and `list` manage friends who may open all your protected containers.
 - **Passwords:** `/vlock password WORD` puts a password on a container. Others open it with `/vlock unlock WORD` until they log out. Only a salted hash is stored.
-- **Manage protection:** `/vlock` (or `/lock`) shows the owner, `/vlock on` protects a container by hand, and `/vlock off` removes the protection.
+- **Menu (1.5.0):** `/vlock` (or `/lock`, also in `/vmenu`) opens a menu with the container you look at (protect, remove, set or enter a password) and your chest buddies (remove, "Add buddy" through Vystorm Core's player picker on Core 0.71.0 or newer, else a name prompt). Works as a Vystorm Screen and as a chest menu. Sneak and right-click a player for "Add as chest buddy".
+- **Manage protection:** `/vlock info` shows the owner, `/vlock on` protects a container by hand, and `/vlock off` removes the protection.
 - **No loopholes:** strangers cannot break protected containers, hoppers cannot pull items out (unless they belong to the same owner), and explosions, pistons, withers and fire do not get them either.
 - **Permissions:** `vystormlocks.use` (default true) and `vystormlocks.bypass` (op).
 - **Languages:** 7 languages through the Vystorm Core language system, with a tutorial in `/vmenu`.

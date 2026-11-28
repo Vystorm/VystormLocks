@@ -116,6 +116,7 @@ public final class LocksPlugin extends JavaPlugin implements Listener {
         for (UUID owner : store.owners().keySet()) ownerNames.put(owner, name(owner));
         applyRankings();
         registerCommands();
+        registerMenu();
         getLogger().info(store.size() + " protected blocks loaded.");
     }
 
@@ -489,86 +490,185 @@ public final class LocksPlugin extends JavaPlugin implements Listener {
                 "buddies", store.buddies(l.owner()).size());
     }
 
+    /**
+     * The answer of an action as a language key with its placeholders (1.5.0): commands send it as the chat line they
+     * always sent, the menu shows the same text as its status line.
+     */
+    record Msg(boolean ok, String key, Object... args) {
+        static Msg ok(String key, Object... args) { return new Msg(true, key, args); }
+        static Msg no(String key, Object... args) { return new Msg(false, key, args); }
+    }
+
+    void send(CommandSender sender, Msg msg) { lang.send(sender, msg.key(), msg.args()); }
+
+    /** The off message of {@link #off} as a Msg, null while the feature is on. */
+    Msg offMsg(Feature feature) {
+        if (on(feature)) return null;
+        Feature.Switches current = switches;
+        if (feature != Feature.LOCKS && current != null && !current.off().contains(feature))
+            return Msg.no("feature-needs", "switch", Feature.LOCKS.path, "name", lang.plain(Bukkit.getConsoleSender(), Feature.LOCKS.label()));
+        return Msg.no("feature-off");
+    }
+
+    private Msg failed(IOException failure) {
+        getLogger().warning("Cannot save locks.yml: " + failure.getMessage());
+        return Msg.no("save-failed");
+    }
+
     void protect(Player player) {
         if (off(player, Feature.MANUAL)) return;
         Block block = target(player);
-        if (block == null) return;
-        Optional<Map.Entry<String, LockStore.Lock>> lock = lockOf(block);
-        if (lock.isPresent()) {
-            lang.send(player, lock.get().getValue().owner().equals(player.getUniqueId()) ? "already-yours" : "locked", "owner", name(lock.get().getValue().owner()));
-            return;
-        }
-        try { store.put(key(block), new LockStore.Lock(player.getUniqueId(), null, null)); lang.send(player, "protected"); }
-        catch (IOException failure) { fail(player, failure); }
+        if (block != null) send(player, protect(player, block));
     }
 
-    private Optional<Map.Entry<String, LockStore.Lock>> owned(Player player) {
-        Block block = target(player);
-        if (block == null) return Optional.empty();
+    /** {@code /vlock on} on a given container (the command's looked-at block, or the menu's). */
+    Msg protect(Player player, Block block) {
+        Msg off = offMsg(Feature.MANUAL);
+        if (off != null) return off;
         Optional<Map.Entry<String, LockStore.Lock>> lock = lockOf(block);
-        if (lock.isEmpty()) { lang.send(player, "info-free"); return Optional.empty(); }
-        if (!lock.get().getValue().owner().equals(player.getUniqueId()) && !player.hasPermission(BYPASS)) {
-            lang.send(player, "not-yours", "owner", name(lock.get().getValue().owner()));
-            return Optional.empty();
-        }
-        return lock;
+        if (lock.isPresent())
+            return Msg.no(lock.get().getValue().owner().equals(player.getUniqueId()) ? "already-yours" : "locked", "owner", name(lock.get().getValue().owner()));
+        try { store.put(key(block), new LockStore.Lock(player.getUniqueId(), null, null)); return Msg.ok("protected"); }
+        catch (IOException failure) { return failed(failure); }
+    }
+
+    /** Why the player may not manage this lock, null when they may (owner or bypass). */
+    private Msg notOwned(Player player, Optional<Map.Entry<String, LockStore.Lock>> lock) {
+        if (lock.isEmpty()) return Msg.no("info-free");
+        if (!lock.get().getValue().owner().equals(player.getUniqueId()) && !player.hasPermission(BYPASS))
+            return Msg.no("not-yours", "owner", name(lock.get().getValue().owner()));
+        return null;
     }
 
     void unprotect(Player player) {
         if (off(player, Feature.MANUAL)) return;
-        owned(player).ifPresent(entry -> {
-            try { store.remove(entry.getKey()); lang.send(player, "unprotected"); }
-            catch (IOException failure) { fail(player, failure); }
-        });
+        Block block = target(player);
+        if (block != null) send(player, unprotect(player, block));
+    }
+
+    Msg unprotect(Player player, Block block) {
+        Msg off = offMsg(Feature.MANUAL);
+        if (off != null) return off;
+        Optional<Map.Entry<String, LockStore.Lock>> lock = lockOf(block);
+        Msg denied = notOwned(player, lock);
+        if (denied != null) return denied;
+        try { store.remove(lock.get().getKey()); return Msg.ok("unprotected"); }
+        catch (IOException failure) { return failed(failure); }
     }
 
     void password(Player player, String password) {
         if (off(player, Feature.PASSWORDS)) return;
-        owned(player).ifPresent(entry -> {
-            boolean clear = password == null || password.equalsIgnoreCase("clear") || password.equalsIgnoreCase("-");
-            if (!clear && (password.length() < 3 || password.length() > 64)) { lang.send(player, "password-length"); return; }
-            try {
-                store.put(entry.getKey(), entry.getValue().withPassword(clear ? null : password));
-                lang.send(player, clear ? "password-cleared" : "password-set");
-            } catch (IOException failure) { fail(player, failure); }
-        });
+        Block block = target(player);
+        if (block != null) send(player, password(player, block, password));
+    }
+
+    /** {@code password} null, "clear" or "-" removes the password. */
+    Msg password(Player player, Block block, String password) {
+        Msg off = offMsg(Feature.PASSWORDS);
+        if (off != null) return off;
+        Optional<Map.Entry<String, LockStore.Lock>> lock = lockOf(block);
+        Msg denied = notOwned(player, lock);
+        if (denied != null) return denied;
+        boolean clear = password == null || password.equalsIgnoreCase("clear") || password.equalsIgnoreCase("-");
+        if (!clear && (password.length() < 3 || password.length() > 64)) return Msg.no("password-length");
+        try {
+            store.put(lock.get().getKey(), lock.get().getValue().withPassword(clear ? null : password));
+            return Msg.ok(clear ? "password-cleared" : "password-set");
+        } catch (IOException failure) { return failed(failure); }
     }
 
     void unlock(Player player, String password) {
         if (off(player, Feature.PASSWORDS)) return;
         Block block = target(player);
-        if (block == null) return;
+        if (block != null) send(player, unlock(player, block, password));
+    }
+
+    Msg unlock(Player player, Block block, String password) {
+        Msg off = offMsg(Feature.PASSWORDS);
+        if (off != null) return off;
         Optional<Map.Entry<String, LockStore.Lock>> lock = lockOf(block);
-        if (lock.isEmpty() || !lock.get().getValue().hasPassword()) { lang.send(player, "no-password"); return; }
-        if (!lock.get().getValue().matches(password)) { lang.send(player, "wrong-password"); return; }
+        if (lock.isEmpty() || !lock.get().getValue().hasPassword()) return Msg.no("no-password");
+        if (password == null || !lock.get().getValue().matches(password)) return Msg.no("wrong-password");
         unlocked.computeIfAbsent(player.getUniqueId(), k -> new HashSet<>()).add(lock.get().getKey());
-        lang.send(player, "unlocked");
+        return Msg.ok("unlocked");
     }
 
     void buddyAdd(Player player, String name) {
         if (off(player, Feature.BUDDIES)) return;
         OfflinePlayer buddy = resolve(name);
         if (buddy == null) { lang.send(player, "unknown-player", "player", name); return; }
-        if (buddy.getUniqueId().equals(player.getUniqueId())) { lang.send(player, "buddy-self"); return; }
+        send(player, addBuddy(player, buddy.getUniqueId(), buddy.getName()));
+    }
+
+    /** Adds a chest buddy by id (command, menu, player picker, player menu); tells an online buddy. */
+    Msg addBuddy(Player player, UUID buddy, String buddyName) {
+        Msg off = offMsg(Feature.BUDDIES);
+        if (off != null) return off;
+        if (buddy.equals(player.getUniqueId())) return Msg.no("buddy-self");
         int max = Math.max(1, getConfig().getInt("max-buddies", 32));
-        if (!store.isBuddy(player.getUniqueId(), buddy.getUniqueId()) && store.buddies(player.getUniqueId()).size() >= max) {
-            lang.send(player, "buddy-limit", "max", max); return;
-        }
+        if (!store.isBuddy(player.getUniqueId(), buddy) && store.buddies(player.getUniqueId()).size() >= max) return Msg.no("buddy-limit", "max", max);
         try {
-            if (store.addBuddy(player.getUniqueId(), buddy.getUniqueId())) {
-                lang.send(player, "buddy-added", "player", buddy.getName());
-                if (buddy.getPlayer() != null) lang.send(buddy.getPlayer(), "buddy-added-you", "player", player.getName());
-            } else lang.send(player, "buddy-already", "player", buddy.getName());
-        } catch (IOException failure) { fail(player, failure); }
+            if (!store.addBuddy(player.getUniqueId(), buddy)) return Msg.no("buddy-already", "player", buddyName);
+            Player online = Bukkit.getPlayer(buddy);
+            if (online != null) lang.send(online, "buddy-added-you", "player", player.getName());
+            return Msg.ok("buddy-added", "player", buddyName);
+        } catch (IOException failure) { return failed(failure); }
     }
 
     void buddyRemove(Player player, String name) {
         if (off(player, Feature.BUDDIES)) return;
         OfflinePlayer buddy = resolve(name);
+        if (buddy == null) { lang.send(player, "buddy-missing", "player", name); return; }
+        Msg msg = removeBuddy(player, buddy.getUniqueId(), buddy.getName());
+        // the command names the player as typed when they were no buddy
+        send(player, msg.ok() || !"buddy-missing".equals(msg.key()) ? msg : Msg.no("buddy-missing", "player", name));
+    }
+
+    Msg removeBuddy(Player player, UUID buddy, String buddyName) {
+        Msg off = offMsg(Feature.BUDDIES);
+        if (off != null) return off;
         try {
-            if (buddy != null && store.removeBuddy(player.getUniqueId(), buddy.getUniqueId())) lang.send(player, "buddy-removed", "player", buddy.getName());
-            else lang.send(player, "buddy-missing", "player", name);
-        } catch (IOException failure) { fail(player, failure); }
+            return store.removeBuddy(player.getUniqueId(), buddy) ? Msg.ok("buddy-removed", "player", buddyName) : Msg.no("buddy-missing", "player", buddyName);
+        } catch (IOException failure) { return failed(failure); }
+    }
+
+    /** The player's chest buddies (ids). */
+    Set<UUID> buddiesOf(Player player) { return store.buddies(player.getUniqueId()); }
+
+    // ---- menu (1.5.0) -----------------------------------------------------------------------------------------------
+
+    private LocksMenu menu;
+
+    /** Plain {@code /vlock}: the locks menu; where no menu can open, the info line as before. */
+    void openMenu(Player player) {
+        if (off(player, Feature.LOCKS)) return;
+        Vystorm.vystorm_core.panel.PanelOpenResult result = menu == null ? Vystorm.vystorm_core.panel.PanelOpenResult.NONE : menu.open(player);
+        if (result == Vystorm.vystorm_core.panel.PanelOpenResult.NONE && on(Feature.MANUAL)) info(player);
+    }
+
+    private void registerMenu() {
+        try {
+            menu = new LocksMenu(this, core, lang);
+            menu.register();
+        } catch (RuntimeException | LinkageError failure) {
+            menu = null;
+            getLogger().warning("Locks menu not registered, /vlock shows the info line: " + failure);
+        }
+        try { LocksMenuEntries.register(this, core, lang); }
+        catch (RuntimeException | LinkageError failure) { getLogger().fine("Player menu entry not registered: " + failure); }
+    }
+
+    @EventHandler
+    public void menuClick(org.bukkit.event.inventory.InventoryClickEvent event) {
+        if (!(event.getView().getTopInventory().getHolder() instanceof LocksChest chest)) return;
+        event.setCancelled(true);
+        if (event.getClickedInventory() != event.getView().getTopInventory() || !(event.getWhoClicked() instanceof Player player)) return;
+        chest.click(player, event.getRawSlot());
+    }
+
+    @EventHandler
+    public void menuDrag(org.bukkit.event.inventory.InventoryDragEvent event) {
+        if (event.getView().getTopInventory().getHolder() instanceof LocksChest) event.setCancelled(true);
     }
 
     void buddyList(Player player) {
@@ -615,7 +715,7 @@ public final class LocksPlugin extends JavaPlugin implements Listener {
         return gate(CommandSpec.command("vlock"), p, Feature.LOCKS)
                 .aliases("lock")
                 .playerOnly().permission(USE)
-                .executes(ctx -> p.info(ctx.player()))
+                .executes(ctx -> p.openMenu(ctx.player()))
                 .sub("info", s -> gate(s, p, Feature.MANUAL).playerOnly().executes(ctx -> p.info(ctx.player())))
                 .sub("on", s -> gate(s, p, Feature.MANUAL).playerOnly().executes(ctx -> p.protect(ctx.player())))
                 .sub("off", s -> gate(s, p, Feature.MANUAL).playerOnly().executes(ctx -> p.unprotect(ctx.player())))
